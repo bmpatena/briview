@@ -826,7 +826,7 @@ cout<<"imthresh1 "<<im_thresh_scale<<endl;
 
     void ImageContainer::updateImageProperties(int index)
     {
-       // cout<<"update image properties"<<endl;
+//        cout<<"update image properties"<<endl;
         vid_form->setImageExtents(static_cast<int>(v_im_dims.at(index).xsize/v_im_dims.at(index).xdim),\
                                    static_cast<int>(v_im_dims.at(index).ysize/v_im_dims.at(index).ydim),\
                                    static_cast<int>(v_im_dims.at(index).zsize/v_im_dims.at(index).zdim));
@@ -844,7 +844,7 @@ cout<<"imthresh1 "<<im_thresh_scale<<endl;
 
             im_form->setImageOpacity( v_im_opacity_abs[index] );
             im_form->setImageOpacitySlider( v_im_opacity_abs[index] );
-            cout<<"update image properties "<<index<<" "<<v_im_onoff[0]<<" "<<v_im_onoff[1]<<endl;
+//            cout<<"update image properties2 "<<index<<" "<<v_im_onoff[0]<<" "<<v_im_onoff[1]<<" "<<v_im_onoff[2]<<endl;
             im_form->toggleImage(v_im_onoff[index]);
 
           //  int cmap_index=v_cmap_index.at(index);
@@ -882,7 +882,8 @@ cout<<"imthresh1 "<<im_thresh_scale<<endl;
     {
         glUseProgram(shaderProgram);
         vector<int> cur_indices = im_form->getCurrentImageIndices();
-         for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
+        cout<<"ImageContainer::toggleImage " <<cur_indices.size()<<endl;
+        for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
          {
              cout<<"set image state "<<*i_ind<<" "<<state<<endl;
           v_im_onoff[*i_ind]=state;

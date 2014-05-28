@@ -64,11 +64,14 @@ public slots:
     void doDockBlending();
     void doDockImList();
 
-
+void slot_currentImageChanged(int index );
     void slot_toggleImage(bool state);
+  //  void slot_toggleImage();
+
     void setImageOpacitySlider(QString op);
     void setImageOpacityFromSlider(int op);
         void setImageOpacityFromSlider();
+
 
     void changeXVoxel(QString num);
     void changeYVoxel(QString num);

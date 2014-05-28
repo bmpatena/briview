@@ -12,7 +12,7 @@
 
 #include "GlyphGenerator.h"
 extern "C" {
-#include "gifti_io.h"
+#include "giftiio/gifti_io.h"
 }
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 

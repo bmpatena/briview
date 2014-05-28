@@ -2,14 +2,21 @@
 # Project created by QtCreator 2009-03-10T12:18:12
 # -------------------------------------------------
 QT += opengl
+QT       += core gui widgets designer
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
+QMAKE_MAC_SDK=macosx
+QMAKE_MAC_SDK.macosx.path=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
+
 TARGET = briview
-QMAKE_CXXFLAGS = -arch x86_64
+
+#QMAKE_CXXFLAGS = -arch x86_64
 !macx {
 DEFINES = GL_GLEXT_PROTOTYPES
 }
 #CONFIG+= qt release i386 x86_64
-CONFIG+= qt release x86_64
- CONFIG -= i386
+CONFIG+= qt release
+#x86_64
+ #CONFIG -= i386
 #x86_64 static
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -33,8 +40,8 @@ INCLUDEPATH = ${FSLDIR}/include/ \
     ${HOME}/fslsrc/ \
     ${FSLDIR}/include/nifti \
     ${FSLDIR}/extras/include/newmat \
-    ${HOME}/fslsrc/fslsurface \
-    ${HOME}/fslsrc/gifti \
+    ..//fslsurface \
+#${FSLDIR}/include/giftiio \
     ${HOME}/fslsrc/expat/lib \
     /opt/local/include \
     /usr/local/include
@@ -46,9 +53,8 @@ macx {
   #  LIBS +=-L/usr/local/Trolltech/Qt-4.7.2/lib/
     LIBS += -framework GLUT
     LIBS +=-L./\
-    -L${HOME}/fslsrc/fslsurface/ \
+    #-L../fslsurface/ \
     -L${HOME}/fslsrc/fslvtkio/ \
-    -L${HOME}/fslsrc/gifti/ \
     -L${HOME}/fslsrc/expat/ \
     -L${HOME}/fslsrc/lib/ \
     -L${FSLDIR}/lib/ \

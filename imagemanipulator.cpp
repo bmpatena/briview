@@ -17,11 +17,12 @@ ImageManipulator::ImageManipulator(QWidget *parent) :
     connect(ui->x_slider,SIGNAL(sliderMoved(int)),this,SIGNAL(sig_changedSliceX(int)));
     connect(ui->y_slider,SIGNAL(sliderMoved(int)),this,SIGNAL(sig_changedSliceY(int)));
     connect(ui->z_slider,SIGNAL(sliderMoved(int)),this,SIGNAL(sig_changedSliceZ(int)));
-    connect(ui->x_onoff,SIGNAL(toggled(bool)),this,SIGNAL(sig_toggledSliceX(bool)));
-    connect(ui->y_onoff,SIGNAL(toggled(bool)),this,SIGNAL(sig_toggledSliceY(bool)));
-    connect(ui->z_onoff,SIGNAL(toggled(bool)),this,SIGNAL(sig_toggledSliceZ(bool)));
+    connect(ui->x_onoff,SIGNAL(clicked(bool)),this,SIGNAL(sig_toggledSliceX(bool)));
+    connect(ui->y_onoff,SIGNAL(clicked(bool)),this,SIGNAL(sig_toggledSliceY(bool)));
+    connect(ui->z_onoff,SIGNAL(clicked(bool)),this,SIGNAL(sig_toggledSliceZ(bool)));
 
-    connect(ui->image_list, SIGNAL(currentRowChanged (int) ),this,SIGNAL(sig_changedCurrentImage(int)));
+    connect(ui->image_list, SIGNAL(currentRowChanged (int) ),this,SLOT(slot_currentImageChanged(int)));
+
     connect(ui->im_up,SIGNAL(pressed()),this,SLOT(shiftImageUpList()));
     connect(ui->im_down,SIGNAL(pressed()),this,SLOT(shiftImageDownList()));
      connect(ui->comboImageSpace,SIGNAL(activated (int)) ,this,SIGNAL(sig_changedImageSpace(int)));
@@ -50,7 +51,7 @@ ImageManipulator::ImageManipulator(QWidget *parent) :
         connect(ui->z_mm,SIGNAL(textEdited(QString)),this,SLOT(changeZmm(QString)));
 
 
-    connect(ui->but_im_onoff,SIGNAL(toggled(bool)),this,SLOT(slot_toggleImage(bool)));
+    connect(ui->but_im_onoff,SIGNAL(clicked(bool)),this,SLOT(slot_toggleImage(bool)));
 
     connect(ui->ctab_sc1, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourTableSc()));
     connect(ui->ctab_sc2, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourTableSc()));
@@ -157,6 +158,13 @@ void ImageManipulator::changeEvent(QEvent *e)
     }
 }
 
+void ImageManipulator::slot_currentImageChanged(int index )
+{
+        int index_rev = ui->image_list->count() - 1 - index ;
+        cout<<"ImageManipulator::slot_currentImageChanged( "<<index<<" "<<index_rev<<endl;
+
+    emit sig_changedCurrentImage(index_rev);
+}
 
 //void ImageManipulator::updatePageText()
 //{
@@ -693,6 +701,7 @@ void ImageManipulator::setSlicesVisibility(const bool3 & vis)
 
 void ImageManipulator::slot_toggleImage(bool state)
 {
+//    bool state = ui->but_im_onoff->isChecked();
     if (state)
         ui->but_im_onoff->setText("Image ON");
     else
@@ -772,8 +781,11 @@ vector<int> ImageManipulator::getCurrentImageIndices()
     QList<QListWidgetItem *> sel_items = ui->image_list->selectedItems();
    //const QModelIndexList selectedIndices = ui->surface_list->selectedIndexes();
     for ( QList<QListWidgetItem *>::iterator i_s = sel_items.begin(); i_s != sel_items.end(); ++i_s)
-        indices.push_back(ui->image_list->row(*i_s));
-    //ui->image_list->count() -1 - ui->image_list->row(*i_s));
+    {
+        cout<<"getCurrentImageindices "<<*i_s<<endl;
+        //invert indicies
+        indices.push_back( (ui->image_list->count() -1 ) - ui->image_list->row(*i_s));
+    }//ui->image_list->count() -1 - ui->image_list->row(*i_s));
                           //ui->image_list->row(*i_s));
 
     return indices;
@@ -801,11 +813,12 @@ void ImageManipulator::addItemToList(const string & filename)
 
    // ui->image_list->addItem(QString(filename.c_str()).section('/',-1));
    // ui->image_list->setCurrentRow(0);//ui->image_list->count()-1);
-    ui->image_list->addItem(QString(filename.c_str()).section('/',-1) );
+   // ui->image_list->addItem(QString(filename.c_str()).section('/',-1) );
         ////cout<<"add tien2 "<<ui->surface_list->count()<<endl;
+    ui->image_list->insertItem(0,QString(filename.c_str()).section('/',-1) );
 
-    ui->image_list->setCurrentRow(ui->image_list->count()-1,QItemSelectionModel::Deselect);
-    ui->image_list->setCurrentRow(ui->image_list->count()-1);
+//    ui->image_list->setCurrentRow(ui->image_list->count()-1,QItemSelectionModel::Deselect);
+//    ui->image_list->setCurrentRow(ui->image_list->count()-1);
 }
 
 void ImageManipulator::shiftImageDownList()
