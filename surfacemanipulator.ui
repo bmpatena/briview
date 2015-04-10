@@ -3525,9 +3525,6 @@
              </layout>
             </item>
            </layout>
-           <zorder>dispGlyphs</zorder>
-           <zorder>glyph_tip_radius</zorder>
-           <zorder></zorder>
           </widget>
          </widget>
         </item>

@@ -45,9 +45,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-406</y>
+         <y>0</y>
          <width>424</width>
-         <height>1599</height>
+         <height>1591</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -2276,11 +2276,7 @@
                     </item>
                    </layout>
                   </item>
-                 </layout>
-                 <zorder></zorder>
-                 <zorder></zorder>
-                 <zorder></zorder>
-                 <zorder>layoutWidget</zorder>
+                 </layout>                
                 </widget>
                </item>
               </layout>

@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 
     a.desktop()->screenGeometry();
     MainWindow w;
-
     w.setMaximumSize ( a.desktop()->screenGeometry().size() );
     w.showMaximized();
 

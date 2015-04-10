@@ -1652,6 +1652,7 @@ void myOpenGLWidget::resizeGL(int w, int h)
     // setup viewport, projection etc.:
     width=w;
     height=h;
+
 #ifdef GL_GLEXT_PROTOTYPES 
 
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT,rbo[Depth]);

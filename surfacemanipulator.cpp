@@ -168,6 +168,8 @@ ui->but_doDockColourBar->hide();
 
 ///----------------
 ui->surface_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+//deafilts
+ui->radio_useScalars->setChecked(true);
 
 }
 void SurfaceManipulator::setCullFace(const bool & cull )

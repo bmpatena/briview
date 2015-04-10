@@ -4,7 +4,6 @@
 //#define GL_GLEXT_PROTOTYPES
 
 #include <QtOpenGL>
-
 #include "scenewriter.h"
 #include <iostream>
 #include <fslsurface.h>
@@ -27,6 +26,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass)
 {
     ui->setupUi(this);
+
+
+//    ui->menuBar->setVisible(true);
+    //setup menu
+//    QMenuBar *menuBar = new QMenuBar(0);
+//    menuBar->addMenu("file");
+//    setMenuBar(menuBar);
     QGLFormat fmt = ui->openGLwidget->format();
     fmt.setSwapInterval(1);
     ui->openGLwidget->setFormat(fmt);
@@ -38,16 +44,16 @@ MainWindow::MainWindow(QWidget *parent)
     surfaceContainer = new SurfaceContainer();
     marchingCubes_widget = new MarchingCubes();
 
-    //scene->setVisible(1);
-    scene->setVisible(0);
+    scene->setVisible(1);
+    //scene->setVisible(0);
 
-  //  imageContainer->setVisible(1);
-    imageContainer->setVisible(0);
+   imageContainer->setVisible(1);
+  //  imageContainer->setVisible(0);
     imageContainer->setImVidCaptureForm( im_vid_widget );
 
     //fixes wierd artifact, but of a hack but oh well
     surfaceContainer->setVisible(1);
-    surfaceContainer->setVisible(0);
+//    surfaceContainer->setVisible(0);
 
     surfaceContainer->importPresetMaterials(QApplication::applicationDirPath().toStdString() + "/assets/preset_materials.txt");
 
@@ -126,7 +132,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->openGLwidget->setImageContainer(&imageContainer);
     ui->openGLwidget->setSurfaceContainer(&surfaceContainer);
     ui->openGLwidget->setSceneProperties(&scene);
-
 
 
 

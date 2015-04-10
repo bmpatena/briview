@@ -9,6 +9,7 @@
 #include "my_structs.h"
 #include "fslsurface/fslsurface.h"
 #include <QMainWindow>
+#include <QMenuBar>
 
 namespace Ui
 {
@@ -58,6 +59,7 @@ void addColourBarToImage();
 private:
 
     Ui::MainWindowClass *ui;
+    QMenuBar *m_menuBar;
 
     briview::MarchingCubes* marchingCubes_widget;
     briview::ImageContainer* imageContainer;

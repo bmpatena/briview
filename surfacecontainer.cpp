@@ -69,6 +69,9 @@ namespace briview{
         connect(surf_form, SIGNAL(sig_ff_ccw(bool)),this,SLOT(setFrontFaceCCW(bool)));
         c_bar=NULL;
         c_bar_onoff=false;
+//        surf_form->setUseScalarMap(1);
+
+
     }
     SurfaceContainer::~SurfaceContainer( )
     {
