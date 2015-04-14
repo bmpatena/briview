@@ -19,14 +19,31 @@ using namespace NEWMAT;
 using namespace fslsurface_name;
 using namespace Ui;
 using namespace briview;
+#include <QAction>
+#include <QMenu>
 
 //using namespace briview_structs;
 using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass)
 {
-    ui->setupUi(this);
+      ui->setupUi(this);
+      cout<<"done setup ui"<<endl;
+//    QAction *exitAction = new QAction(tr("Exit"), this);
+//    QAction *aboutAct = new QAction(tr("About"), this);
+//    QAction *aboutQtAct = new QAction(tr("About Qt"), this);
 
+//    connect(exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+//    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+//    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+//cout<<"add menu "<<endl;
+//    QMenu* fileMenu = menuBar()->addMenu(tr("File"));
+//    fileMenu->addAction(exitAction);
+//cout<<"done fielmenu"<<endl;
+//    QMenu* helpMenu = menuBar()->addMenu(tr("About"));
+//    helpMenu->addAction(aboutAct);
+//    helpMenu->addAction(aboutQtAct);
+//    cout<<"done about"<<endl;
 
 //    ui->menuBar->setVisible(true);
     //setup menu
@@ -44,16 +61,16 @@ MainWindow::MainWindow(QWidget *parent)
     surfaceContainer = new SurfaceContainer();
     marchingCubes_widget = new MarchingCubes();
 
-    scene->setVisible(1);
-    //scene->setVisible(0);
+//    scene->setVisible(1);
+   scene->setVisible(1);
 
-   imageContainer->setVisible(1);
-  //  imageContainer->setVisible(0);
+//   imageContainer->setVisible(1);
+    imageContainer->setVisible(0);
     imageContainer->setImVidCaptureForm( im_vid_widget );
 
     //fixes wierd artifact, but of a hack but oh well
-    surfaceContainer->setVisible(1);
-//    surfaceContainer->setVisible(0);
+//    surfaceContainer->setVisible(1);
+    surfaceContainer->setVisible(0);
 
     surfaceContainer->importPresetMaterials(QApplication::applicationDirPath().toStdString() + "/assets/preset_materials.txt");
 
@@ -63,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),scene);
 
     //-----------------------SETUP DOCKS IN SIDE TAB-----------------------//
+    cout<<"run connections"<<endl;
 
     //----------------------SETUP SCENE CONNECTIONS----------------------//
 

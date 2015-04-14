@@ -3,7 +3,7 @@
  <class>MainWindowClass</class>
  <widget class="QMainWindow" name="MainWindowClass">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::NonModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -473,7 +473,7 @@
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -898,6 +898,9 @@
      </disabled>
     </palette>
    </property>
+   <property name="defaultUp">
+    <bool>false</bool>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="minimumSize">
      <size>
@@ -1155,6 +1158,9 @@
   </action>
   <action name="actionImage_Manipulator_Sidebar">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
