@@ -7,7 +7,9 @@
 
 
 //#include <fslsurface/fslsurface_structs.h>
-//#include <fslsurface/fslsurfaceiosurf.h>
+//#include <fslsurface/fslsurfaceio.h>
+//#include <fslsurface/fslsurfacegl.h>
+
 //#include <fslsurface/fslsurface_structs.h>
 
 #include "GlyphGenerator.h"

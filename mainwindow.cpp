@@ -50,6 +50,18 @@ MainWindow::MainWindow(QWidget *parent)
 //    QMenuBar *menuBar = new QMenuBar(0);
 //    menuBar->addMenu("file");
 //    setMenuBar(menuBar);
+
+//                  QIcon(":/images/open.png"), tr("&Open..."), this);
+//        openAct->setShortcuts(QKeySequence::Open);
+//        openAct->setStatusTip(tr("Open an existing file"));
+//        connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+//        fileMenu->addAction(openAct);
+
+
+//          fileMenu->addAction(newAct);
+      ///done menubar setup
+
     QGLFormat fmt = ui->openGLwidget->format();
     fmt.setSwapInterval(1);
     ui->openGLwidget->setFormat(fmt);
@@ -61,8 +73,11 @@ MainWindow::MainWindow(QWidget *parent)
     surfaceContainer = new SurfaceContainer();
     marchingCubes_widget = new MarchingCubes();
 
+    graphContainer_ = new graphContainer();
+graphContainer_->setVisible(0);
+
 //    scene->setVisible(1);
-   scene->setVisible(1);
+   scene->setVisible(0);
 
 //   imageContainer->setVisible(1);
     imageContainer->setVisible(0);
@@ -78,6 +93,15 @@ MainWindow::MainWindow(QWidget *parent)
     this->addDockWidget(Qt::DockWidgetArea(0x2),imageContainer->getImageManipulatorWidget());
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),surfaceContainer->getSurfaceManipulatorWidget());
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),scene);
+
+    tabifyDockWidget(imageContainer->getImageManipulatorWidget(),graphContainer_->getGraphManipulatorWidgets());
+
+    //setup menuBar
+    setUpMenu();
+
+
+
+
 
     //-----------------------SETUP DOCKS IN SIDE TAB-----------------------//
     cout<<"run connections"<<endl;
@@ -95,63 +119,19 @@ MainWindow::MainWindow(QWidget *parent)
     //----------------------END SETUP SCENE CONNECTIONS----------------------//
     connect(surfaceContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
 
-    connect(ui->actionAppend_Surface_Data, SIGNAL(triggered()),this,SLOT(doAppendSurfaceData()));
     connect(surfaceContainer,SIGNAL(sig_appendSurfaceData()),this,SLOT(doAppendSurfaceData()));
     //----------------end setup surface conntainer connections--------------//
 
     connect(imageContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
-
-
-    //----------------------SETUP ACTION CONNECTIONS (Toolbar)------------------//
-    connect(ui->actionLoad_Surface, SIGNAL(triggered()),this,SLOT(doAddSurface()));
-    connect(ui->actionSave_Surface, SIGNAL(triggered()),this,SLOT(writeSurface()));
-
-    //-----scene actions--------------//
-    connect(ui->actionScene_Manipulator_Sidebar,SIGNAL(toggled(bool)),scene,SLOT(setVisible(bool)));
-    connect(ui->actionSceneNavigator,SIGNAL(triggered()),scene,SLOT(showDockMouse()));
-    connect(ui->actionLighting_2,SIGNAL(triggered()),scene,SLOT(showDockLights()));
-    connect(ui->actionCamera,SIGNAL(triggered()),scene,SLOT(showDockCamera()));
-    connect(ui->actionBackground_Colour,SIGNAL(triggered()),scene,SLOT(showDockBackground()));
-   // connect(ui->actionScreen_Capture,SIGNAL(triggered()),this,SLOT(screenCapture()));
-    connect(ui->actionScreen_Capture,SIGNAL(triggered()),im_vid_widget,SLOT(show()));
-    connect(ui->actionScreen_Capture,SIGNAL(triggered()),im_vid_widget,SLOT(raise()));
-
-    //-----image actions--------------//
-    connect(ui->actionImage_Manipulator_Sidebar,SIGNAL(toggled(bool)),imageContainer,SLOT(setVisible(bool)));
-    connect(ui->actionImage_List,SIGNAL(triggered()),imageContainer,SLOT(showDockImList()));
-    connect(ui->actionImageNavigator,SIGNAL(triggered()),imageContainer,SLOT(showDockImageNavigator()));
-    connect(ui->actionImageColour_map,SIGNAL(triggered()),imageContainer,SLOT(showDockProperties()));
-    connect(ui->actionCoordinate_System,SIGNAL(triggered()),imageContainer,SLOT(showDockCoordinateSystem()));
-    connect(ui->actionBlending_2,SIGNAL(triggered()),imageContainer,SLOT(showDockBlending()));
-    connect(ui->actionImageColour_Bar,SIGNAL(triggered()),imageContainer,SLOT(showDockColourBar()));
-
-
-
-    //-----surface actions--------------//
-    connect(ui->actionSurface_Manipulator_Sidebar,SIGNAL(toggled(bool)),surfaceContainer,SLOT(setVisible(bool)));
-    connect(ui->actionSurface_Scalar_Selector,SIGNAL(triggered()),surfaceContainer,SLOT(showDockSurfaceSelector()));
-    connect(ui->actionMaterial_Properties,SIGNAL(triggered()),surfaceContainer,SLOT(showDockMaterialProperties()));
-    connect(ui->actionColour_Bar,SIGNAL(triggered()),surfaceContainer,SLOT(showDockColourBar()));
-    connect(ui->actionGlyph_Options,SIGNAL(triggered()),surfaceContainer,SLOT(showDockGlyphs()));
-    connect(ui->actionSurface_Colour_Mapping,SIGNAL(triggered()),surfaceContainer,SLOT(showDockColourMap()));
-    connect(ui->actionPolygon_Rendering,SIGNAL(triggered()),surfaceContainer,SLOT(showDockPolygonMode()));
-
-    //-----------------------------------//
-    connect(ui->actionLoad_Image, SIGNAL(triggered()),this,SLOT(doAddImage()));
-     connect(ui->actionSave_Scene, SIGNAL(triggered()),this,SLOT(writeSceneToFile()));
-     connect(ui->actionLoad_Scene, SIGNAL(triggered()),this,SLOT(readSceneFromFile()));
-
-     connect(ui->actionSlice_Surface, SIGNAL(triggered()),surfaceContainer,SLOT(sliceSurfaceY()));
-     connect(ui->actionMarching_Cubes,SIGNAL(triggered()),this,SLOT(showMarchingCubes()));
-     connect(marchingCubes_widget,SIGNAL(sig_apply()),this,SLOT(doMarchingCubes()));
+    connect(marchingCubes_widget,SIGNAL(sig_apply()),this,SLOT(doMarchingCubes()));
 
     //----------------------END SETUP ACTION CONNECTIONS (Toolbar)------------------//
 
     ui->openGLwidget->setImageContainer(&imageContainer);
     ui->openGLwidget->setSurfaceContainer(&surfaceContainer);
+    ui->openGLwidget->setGraphContainer(&graphContainer_);
+
     ui->openGLwidget->setSceneProperties(&scene);
-
-
 
 }
 MainWindow::~MainWindow()
@@ -160,8 +140,176 @@ MainWindow::~MainWindow()
     delete surfaceContainer;
     delete scene;
     delete marchingCubes_widget;
+    delete graphContainer_;
     delete ui;
 }
+
+void MainWindow::setUpMenu()
+{
+    ui->menuBar->clear();
+
+    QMenu* menu_file =  ui->menuBar->addMenu(tr("&File"));
+    QAction* actionLoad_Image = new QAction(tr("&Load Image..."),0);
+    QAction* actionLoad_Surface = new QAction(tr("&Load Surface..."),0);
+    QAction* actionAppend_Surface_Data = new QAction(tr("&Append Surface Data..."),0);
+    QAction* actionSave_Surface = new QAction(tr("&Save Surface..."),0);
+    QAction* actionSave_Scene = new QAction(tr("&Save Scene..."),0);
+    QAction* actionLoad_Scene = new QAction(tr("&Load Scene..."),0);
+    QAction* actionLoad_Graph = new QAction(tr("&Load Graph..."),0);
+
+    //----------------------SETUP ACTION CONNECTIONS (Toolbar)------------------//
+    connect(actionLoad_Image, SIGNAL(triggered()),this,SLOT(doAddImage()));
+    connect(actionLoad_Surface, SIGNAL(triggered()),this,SLOT(doAddSurface()));
+    connect(actionAppend_Surface_Data, SIGNAL(triggered()),this,SLOT(doAppendSurfaceData()));
+    connect(actionSave_Surface, SIGNAL(triggered()),this,SLOT(writeSurface()));
+    connect(actionSave_Scene, SIGNAL(triggered()),this,SLOT(writeSceneToFile()));
+    connect(actionLoad_Scene, SIGNAL(triggered()),this,SLOT(readSceneFromFile()));
+    connect(actionLoad_Graph, SIGNAL(triggered()),this,SLOT(readGraphFromFile()));
+
+    //---------
+    menu_file->addAction(actionLoad_Image);
+    menu_file->addSeparator();
+    menu_file->addAction(actionLoad_Surface);
+    menu_file->addAction(actionAppend_Surface_Data);
+    menu_file->addAction(actionSave_Surface);
+    menu_file->addSeparator();
+    menu_file->addAction(actionSave_Scene);
+    menu_file->addAction(actionLoad_Scene);
+    menu_file->addSeparator();
+    menu_file->addAction(actionLoad_Graph);
+
+
+    /////--------SCENE MENU
+    ///
+
+    QMenu* menu_scene =  ui->menuBar->addMenu(tr("&Scene"));
+
+    QAction* actionScene_Manipulator_Sidebar = new QAction(tr("&Scene Manipulator Sidebar..."),0);
+    actionScene_Manipulator_Sidebar->setCheckable(true);
+    QAction* actionSceneNavigator = new QAction(tr("&Navigator (Mouse UI)..."),0);
+    QAction* actionLighting = new QAction(tr("&Lighting..."),0);
+    QAction* actionCamera = new QAction(tr("&Camera..."),0);
+    QAction* actionBackground_Colour = new QAction(tr("&Background Colour..."),0);
+    QAction* actionScreen_Capture = new QAction(tr("&Screen Capture..."),0);
+
+//    //-----scene actions--------------//
+    connect(actionScene_Manipulator_Sidebar,SIGNAL(toggled(bool)),scene,SLOT(setVisible(bool)));
+    connect(actionSceneNavigator,SIGNAL(triggered()),scene,SLOT(showDockMouse()));
+    connect(actionLighting,SIGNAL(triggered()),scene,SLOT(showDockLights()));
+    connect(actionCamera,SIGNAL(triggered()),scene,SLOT(showDockCamera()));
+    connect(actionBackground_Colour,SIGNAL(triggered()),scene,SLOT(showDockBackground()));
+    connect(actionScreen_Capture,SIGNAL(triggered()),im_vid_widget,SLOT(show()));
+    connect(actionScreen_Capture,SIGNAL(triggered()),im_vid_widget,SLOT(raise()));
+
+
+    menu_scene->addAction(actionScene_Manipulator_Sidebar);
+    menu_scene->addSeparator();
+    menu_scene->addAction(actionSceneNavigator);
+    menu_scene->addAction(actionLighting);
+    menu_scene->addAction(actionCamera);
+    menu_scene->addAction(actionBackground_Colour);
+    menu_scene->addAction(actionScreen_Capture);
+
+
+    /// -------
+    /////--------Image MENU
+    ///
+
+    QMenu* menu_image =  ui->menuBar->addMenu(tr("&Image Tools"));
+
+    QAction* actionImage_Manipulator_Sidebar = new QAction(tr("&Image Manipulator Sidebar..."),0);
+    actionImage_Manipulator_Sidebar->setCheckable(true);
+    QAction* actionImage_List = new QAction(tr("&Image List..."),0);
+    QAction* actionImageNavigator = new QAction(tr("&Slice Plane Navigator..."),0);
+    QAction* actionImageColour_map = new QAction(tr("&Image Material Properties..."),0);
+    QAction* actionCoordinate_System = new QAction(tr("&Coordinate System..."),0);
+    QAction* actionBlending = new QAction(tr("&Blending..."),0);
+    QAction* actionImageColour_Bar = new QAction(tr("&Colour Bar..."),0);
+
+//    //-----scene actions--------------//
+
+    //-----image actions--------------//
+    connect(actionImage_Manipulator_Sidebar,SIGNAL(toggled(bool)),imageContainer,SLOT(setVisible(bool)));
+    connect(actionImage_List,SIGNAL(triggered()),imageContainer,SLOT(showDockImList()));
+    connect(actionImageNavigator,SIGNAL(triggered()),imageContainer,SLOT(showDockImageNavigator()));
+    connect(actionImageColour_map,SIGNAL(triggered()),imageContainer,SLOT(showDockProperties()));
+    connect(actionCoordinate_System,SIGNAL(triggered()),imageContainer,SLOT(showDockCoordinateSystem()));
+    connect(actionBlending,SIGNAL(triggered()),imageContainer,SLOT(showDockBlending()));
+    connect(actionImageColour_Bar,SIGNAL(triggered()),imageContainer,SLOT(showDockColourBar()));
+
+    menu_image->addAction(actionImage_Manipulator_Sidebar);
+    menu_image->addSeparator();
+    menu_image->addAction(actionImage_List);
+    menu_image->addAction(actionImageNavigator);
+    menu_image->addAction(actionImageColour_map);
+    menu_image->addAction(actionCoordinate_System);
+    menu_image->addAction(actionBlending);
+    menu_image->addAction(actionImageColour_Bar);
+
+
+    /// -------
+    ///
+
+    /// -------
+    /////--------Surface MENU
+    ///
+
+    QMenu* menu_surface =  ui->menuBar->addMenu(tr("&Surface Tools"));
+
+    QAction* actionSurface_Manipulator_Sidebar = new QAction(tr("&Surface Manipulator Sidebar..."),0);
+    actionSurface_Manipulator_Sidebar->setCheckable(true);
+    QAction* actionSurface_Scalar_Selector = new QAction(tr("&Surface/Scalar Selector..."),0);
+    QAction* actionSurface_Colour_Mapping = new QAction(tr("&Surface Colour Mapping..."),0);
+    QAction* actionMaterial_Properties = new QAction(tr("&Material Properties..."),0);
+    QAction* actionGlyph_Options = new QAction(tr("&Glyph Options..."),0);
+    QAction* actionColour_Bar = new QAction(tr("&Colour Bar..."),0);
+    QAction* actionPolygon_Rendering = new QAction(tr("&Polygon Rendering..."),0);
+    QAction* actionSlice_Surface = new QAction(tr("&Slice Surface..."),0);
+
+    //-----surface actions--------------//
+    connect(actionSurface_Manipulator_Sidebar,SIGNAL(toggled(bool)),surfaceContainer,SLOT(setVisible(bool)));
+    connect(actionSurface_Scalar_Selector,SIGNAL(triggered()),surfaceContainer,SLOT(showDockSurfaceSelector()));
+    connect(actionMaterial_Properties,SIGNAL(triggered()),surfaceContainer,SLOT(showDockMaterialProperties()));
+    connect(actionColour_Bar,SIGNAL(triggered()),surfaceContainer,SLOT(showDockColourBar()));
+    connect(actionGlyph_Options,SIGNAL(triggered()),surfaceContainer,SLOT(showDockGlyphs()));
+    connect(actionSurface_Colour_Mapping,SIGNAL(triggered()),surfaceContainer,SLOT(showDockColourMap()));
+    connect(actionPolygon_Rendering,SIGNAL(triggered()),surfaceContainer,SLOT(showDockPolygonMode()));
+    connect(actionSlice_Surface, SIGNAL(triggered()),surfaceContainer,SLOT(sliceSurfaceY()));
+
+
+    menu_surface->addAction(actionSurface_Manipulator_Sidebar);
+    menu_surface->addSeparator();
+    menu_surface->addAction(actionSurface_Scalar_Selector);
+    menu_surface->addAction(actionSurface_Colour_Mapping);
+    menu_surface->addAction(actionMaterial_Properties);
+    menu_surface->addAction(actionGlyph_Options);
+    menu_surface->addAction(actionColour_Bar);
+    menu_surface->addAction(actionPolygon_Rendering);
+    menu_surface->addAction(actionSlice_Surface);
+
+
+    /// -------
+    /////--------Other Menu MENU
+    ///
+
+    QMenu* menu_other =  ui->menuBar->addMenu(tr("&Other Tools"));
+    QAction* actionMarching_Cubes = new QAction(tr("&Marchine Cubes..."),0);
+    connect(actionMarching_Cubes,SIGNAL(triggered()),this,SLOT(showMarchingCubes()));
+    menu_surface->addAction(actionMarching_Cubes);
+
+
+    /// -------
+
+
+    QMenu* menu_graph =  ui->menuBar->addMenu(tr("&Graphs"));
+    QAction* openGraphAct = new QAction(tr("&Graph Explorer Sidebar..."),0);
+    openGraphAct->setCheckable(true);
+    menu_graph->addAction(openGraphAct);
+    connect(openGraphAct,SIGNAL(toggled(bool)),graphContainer_,SLOT(setVisible(bool)));
+
+
+}
+
 void MainWindow::showMarchingCubes()
 {
     marchingCubes_widget->show();
@@ -455,6 +603,17 @@ void MainWindow::readSceneFromFile()
         delete f_scene;
 
     }
+}
+
+void MainWindow::readGraphFromFile(){
+    QString filename = QFileDialog::getOpenFileName(this,"Load graph from file...","Unititled",tr("Graph (*.txt)"));
+    if (!filename.isNull())
+    {
+        cout<<"read graoh "<<filename.toStdString()<<endl;
+        graphContainer_->readFile(filename.toStdString());
+    }
+
+
 }
 
 

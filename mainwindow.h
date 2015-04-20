@@ -4,6 +4,7 @@
 #include "marchingcubes_form.h"
 #include "imagecontainer.h"
 #include "surfacecontainer.h"
+#include "graphcontainer.h"
 #include "scene_properties.h"
 #include "imagevideocapture.h"
 #include "my_structs.h"
@@ -55,8 +56,10 @@ void addColourBarToImage();
     void writeSurface();
     void writeSceneToFile();
     void readSceneFromFile();
+    void readGraphFromFile();
 
 private:
+    void setUpMenu();
 
     Ui::MainWindowClass *ui;
     QMenuBar *m_menuBar;
@@ -64,6 +67,8 @@ private:
     briview::MarchingCubes* marchingCubes_widget;
     briview::ImageContainer* imageContainer;
     briview::SurfaceContainer* surfaceContainer;
+    briview::graphContainer* graphContainer_;
+
     briview::scene_properties* scene;
     ImageVideoCapture* im_vid_widget;
 

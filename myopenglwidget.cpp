@@ -1739,6 +1739,10 @@ images->renderColourBar();
     surfaces->renderTranslucentSurfaces();
     surfaces->renderTranslucentGlyphs();
 
+
+    graph_->render();
+
+
     glDepthMask(GL_TRUE);
 
 

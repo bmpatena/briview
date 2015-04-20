@@ -7,6 +7,7 @@
 #include <iostream>
 #include "fslsurface/fslsurface_structs.h"
 #include <briview_structs.h>
+#include "graphcontainer.h"
 #include "surfacecontainer.h"
 #include "imagecontainer.h"
 #include "scene_properties.h"
@@ -28,6 +29,7 @@ public:
     ~myOpenGLWidget() ;
 
     void setCameraPositionToSurface(const int & index);
+    void setGraphContainer(briview::graphContainer** graph_in) { graph_ = *graph_in; }
     void setSurfaceContainer(briview::SurfaceContainer** surf_in);
     void setImageContainer(briview::ImageContainer** images_in) { images=*images_in;}
     void setSceneProperties(briview::scene_properties** scene);
@@ -70,6 +72,7 @@ protected:
     float mouseSensitivity;
     int mouseMode;
     fslsurface_name::int2 prevLoc;
+    briview::graphContainer* graph_;
     briview::SurfaceContainer* surfaces;
     briview::ImageContainer* images;
     briview::scene_properties* scene_props;

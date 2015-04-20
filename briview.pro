@@ -34,7 +34,9 @@ SOURCES += main.cpp \
     colour_bar.cpp \
     surfaceslicer.cpp \
     marchingcubes_form.cpp \
-    imagevideocapture.cpp
+    imagevideocapture.cpp \
+    graphmanipulator.cpp \
+    graphcontainer.cpp
 FSLDIR = /usr/local/fsl
 INCLUDEPATH = ${FSLDIR}/include/ \
     ${HOME}/fslsrc/ \
@@ -126,14 +128,17 @@ HEADERS += mainwindow.h \
     colour_bar.h \
     surfaceslicer.h \
     marchingcubes_form.h \
-    imagevideocapture.h
+    imagevideocapture.h \
+    graphmanipulator.h \
+    graphcontainer.h
 FORMS += mainwindow.ui \
     imagemanipulator.ui \
     surfacemanipulator.ui \
     surfacemanipulator.ui \
     scene_properties.ui \
     marchingcubes_form.ui \
-    imagevideocapture.ui
+    imagevideocapture.ui \
+    graphmanipulator.ui
 OTHER_FILES += glsl_shaders/image_plane_texture.vert \
     glsl_shaders/image_plane_texture.frag \
     glsl_shaders/surface_dir_light.frag \
