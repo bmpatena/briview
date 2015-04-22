@@ -36,6 +36,8 @@ public slots:
 
     void addImageToContainerSlicer(const QString & filename );
     void addSurfaceToContainer(const QString & filename );
+    void addGraphToContainer(const QString & filename );
+
     //void addSurfaceToContainer( fslsurface_name::fslSurface<float,unsigned int> * surface );
     void addSurfaceToContainer( fslsurface_name::fslSurface<float,unsigned int> * surface, const std::string & surf_name );
 

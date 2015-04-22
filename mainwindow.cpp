@@ -27,6 +27,7 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass)
 {
+    cout<<"setupUi"<<endl;
       ui->setupUi(this);
       cout<<"done setup ui"<<endl;
 //    QAction *exitAction = new QAction(tr("Exit"), this);
@@ -129,10 +130,12 @@ graphContainer_->setVisible(0);
 
     ui->openGLwidget->setImageContainer(&imageContainer);
     ui->openGLwidget->setSurfaceContainer(&surfaceContainer);
+   cout<<"set graph conatiner"<<endl;
     ui->openGLwidget->setGraphContainer(&graphContainer_);
+    cout<<"done set graph conatiner"<<endl;
 
     ui->openGLwidget->setSceneProperties(&scene);
-
+    cout<<"done main window constructor "<<endl;
 }
 MainWindow::~MainWindow()
 {
@@ -494,6 +497,12 @@ void MainWindow::addImageToContainerSlicer(const QString & filename )
    addColourBarToImage();
 
 }
+void MainWindow::addGraphToContainer(const QString & filename )
+{
+    graphContainer_->readFile(filename.toStdString());
+}
+
+
 void MainWindow::addSurfaceToContainer(const QString & filename )
 {
     //need to valid vbos from this current context, 0:vertices, 1:incdices

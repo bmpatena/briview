@@ -1685,12 +1685,14 @@ void myOpenGLWidget::resizeGL(int w, int h)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #endif
+    cout<<"done iniatlize GL"<<endl;
 }
 
 
 
 void myOpenGLWidget::paintGL()
 {
+    cout<<"paintGL"<<endl;
 #ifdef GL_GLEXT_PROTOTYPES 
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo);
 #else
@@ -1740,7 +1742,7 @@ images->renderColourBar();
     surfaces->renderTranslucentGlyphs();
 
 
-    graph_->render();
+   graph_->render();
 
 
     glDepthMask(GL_TRUE);

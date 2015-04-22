@@ -24,6 +24,7 @@ graphContainer::graphContainer(QObject *parent) : QObject(parent)
     scalarLoc=2;
 vbos_nodes_=NULL;
 //   vbos_vertices = new GLuint[2];
+connect(ui,SIGNAL(sig_copy_to_surfaces()),this,SIGNAL(sig_copy_to_surfaces()));
 
 }
 
@@ -105,8 +106,13 @@ cout<<"done render "<<endl;
 }
 void graphContainer::render()
 {
-    fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
+    if (vbos_nodes_ != NULL )
+    {
+    cout<<"graph render "<<endl;
+//    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
 
+        fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
+}
 }
 
 

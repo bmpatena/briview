@@ -29,7 +29,7 @@ public:
     void render();
 
 signals:
-
+void sig_copy_to_surfaces();
 public slots:
     void setVisible( bool visible );
 

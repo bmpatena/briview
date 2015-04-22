@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     w.showMaximized();
 
     int i=1;
-    bool loadIm=false,loadMesh=false;
+    bool loadIm=false,loadMesh=false, loadGraph;
     while (i<argc)
     {
         if (!strcmp(argv[i],"-im") )
@@ -24,6 +24,13 @@ int main(int argc, char *argv[])
             w.addImageToContainerSlicer(argv[i]);
             loadIm=true;
             loadMesh=false;
+        }else if (!strcmp(argv[i],"-g") )
+        {
+            i++;
+            w.addGraphToContainer(argv[i]);
+            loadIm=false;
+            loadMesh=false;
+            loadGraph=true;
         }else if (!strcmp(argv[i],"-m") )
         {
             i++;
