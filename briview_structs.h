@@ -8,7 +8,10 @@ namespace briview{
     enum AnimationType { Start, CameraMotion, SliceMoving };
 
 
-
+    struct conn{
+        float strength;
+        int src,dest;
+    };
 
     struct float3{
         float3(float xin, float yin, float zin)

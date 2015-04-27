@@ -32,7 +32,7 @@ public slots:
     void doMarchingCubes();
     void showMarchingCubes();
 
-
+    void copyGraphToSurfaces();
 
     void addImageToContainerSlicer(const QString & filename );
     void addSurfaceToContainer(const QString & filename );

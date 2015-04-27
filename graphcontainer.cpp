@@ -17,14 +17,18 @@ namespace briview{
 graphContainer::graphContainer(QObject *parent) : QObject(parent)
 {
     graph_form = new graphManipulator();
-    radius_ = 5;
+    radius_ = graph_form->getRadius();
+    radius_link_ = graph_form->getLinkRadius();
     Nnodes_ = 0;
     vertexLoc=0;
     normalLoc=1;
     scalarLoc=2;
 vbos_nodes_=NULL;
 //   vbos_vertices = new GLuint[2];
-connect(ui,SIGNAL(sig_copy_to_surfaces()),this,SIGNAL(sig_copy_to_surfaces()));
+connect(graph_form,SIGNAL(sig_copy_to_surfaces()),this,SIGNAL(sig_copy_to_surfaces()));
+connect(graph_form,SIGNAL(sig_updateGraph()),this,SIGNAL(sig_updateGL()));
+connect(graph_form,SIGNAL(sig_updateRadius(double)),this,SLOT(setRadius(double)));
+connect(graph_form,SIGNAL(sig_updateLinkRadius(double)),this,SLOT(setLinkRadius(double)));
 
 }
 
@@ -34,7 +38,7 @@ graphContainer::~graphContainer()
 
     if (vbos_nodes_ != NULL )
     {
-        glDeleteBuffers(2,vbos_nodes_);
+        glDeleteBuffers(4,vbos_nodes_);
         delete[]   vbos_nodes_;
     }
 
@@ -50,12 +54,44 @@ void graphContainer::setVisible( bool visible )
         else
             graph_form->hide();
 }
+void graphContainer::setRadius(  double r_in )
+{
+    cout<<"setRadius "<<endl;
+    radius_ = r_in;
+    generateNodes();
+}
+void graphContainer::setLinkRadius(  double r_in )
+{
+    cout<<"setRadius "<<endl;
+    radius_link_ = r_in;
+    generateLinks();
+}
+void graphContainer::setRadius(  )
+{
+    radius_ = graph_form->getRadius();
+    cout<<"setRadiusFromForm "<<radius_<<endl;
+
+    generateNodes();
+}
+
+void graphContainer::setLinkRadius(  )
+{
+    radius_link_ = graph_form->getLinkRadius();
+    cout<<"setRadiusFromForm "<<radius_link_<<endl;
+
+    generateLinks();
+}
+
+
 void graphContainer::readFile( const string & filename )
 {
     ifstream fin(filename.c_str());
 
     if (fin.is_open())
     {
+        v_conn_.clear();
+        v_cog_.clear();
+        v_names_.clear();
         string line;
         while (getline(fin,line))
         {
@@ -63,21 +99,30 @@ void graphContainer::readFile( const string & filename )
             ss<<line;
             string name;
             float3 cog;
-            ss>>name>>cog.x>>cog.y>>cog.z;
-            v_cog_.push_back(cog);
-            v_names_.push_back(name);
+            ss>>name;
+            if (name == "conn")
+            {
+                conn link;
+                ss>>link.src>>link.dest>>link.strength;
+                v_conn_.push_back(link);
+            }else{
+                ss>>cog.x>>cog.y>>cog.z;
+                v_cog_.push_back(cog);
+                v_names_.push_back(name);
+            }
         }
         fin.close();
     }
 generateNodes();
+generateLinks();
 }
 
 void graphContainer::generateNodes( )
 {
     if (vbos_nodes_ == NULL )
     {
-        vbos_nodes_ = new GLuint[2];
-        glGenBuffers(2,vbos_nodes_);
+        vbos_nodes_ = new GLuint[4];
+        glGenBuffers(4,vbos_nodes_);
     }
 
       vec3<float> cog(0,0,0);
@@ -85,7 +130,7 @@ void graphContainer::generateNodes( )
       for ( typename vector< float3 >::iterator i_c = v_cog_.begin(); i_c != v_cog_.end(); ++i_c,++count )
       {
           fslSurface<float,unsigned int> surf_graph;
-
+cout<<"count  "<<count<<endl;
           makeSphere( surf_graph, radius_, 20 , 20 , vec3<float>(i_c->x,i_c->y,i_c->z) );
           surf_graph.addScalars(count+1,"graph_index");
           if (count == 0 )
@@ -94,27 +139,107 @@ void graphContainer::generateNodes( )
               surf_graph_nodes_.append(surf_graph);
       }
 
+//      count = 0 ;
+//      for ( vector<conn>::iterator i = v_conn_.begin(); i != v_conn_.end(); ++i,++count)
+//      {
 
-      writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes.gii");
-//      GLuint* vbos_nodes_;
+//          fslSurface<float,unsigned int> surf_graph_conns;
+//          cout<<"makeCylinder  "<<endl;
+//          makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
+//          if (count==0)
+//          {
+//              surf_graph_links_ = surf_graph_conns;
+//          }else{
+//              surf_graph_links_.append(surf_graph_conns);
+//          }
+
+//          //      writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes.gii");
+//          cout<<"write cyl"<<endl;
+//      }
+// writeGIFTI(surf_graph_links_,"/Users/brian/git_repos/briview/conns.gii");
+surf_graph_nodes_.calculateNormals();
+//surf_graph_links_.calculateNormals();
+
+ //      GLuint* vbos_nodes_;
 //          GLint vertexLoc, normalLoc, scalarLoc;
       cout<<"render "<<vbos_nodes_[0]<<" "<<vbos_nodes_[1]<<endl;
       glBufferData_Vertices(surf_graph_nodes_,vbos_nodes_[0]);
 glBufferData_Faces(surf_graph_nodes_,vbos_nodes_[1]);
-      fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
+//glBufferData_Vertices(surf_graph_links_,vbos_nodes_[2]);
+//glBufferData_Faces(surf_graph_links_,vbos_nodes_[3]);*/
+
+
+//      fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
 cout<<"done render "<<endl;
+
+
+
+emit sig_updateGL();
 }
+
+void graphContainer::generateLinks( )
+{
+    if (vbos_nodes_ == NULL )
+    {
+        vbos_nodes_ = new GLuint[4];
+        glGenBuffers(4,vbos_nodes_);
+    }
+
+
+      int count = 0 ;
+      for ( vector<conn>::iterator i = v_conn_.begin(); i != v_conn_.end(); ++i,++count)
+      {
+
+          fslSurface<float,unsigned int> surf_graph_conns;
+//          cout<<"makeCylinder  "<<endl;
+          makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
+          if (count==0)
+          {
+              surf_graph_links_ = surf_graph_conns;
+          }else{
+              surf_graph_links_.append(surf_graph_conns);
+          }
+
+          //      writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes.gii");
+//          cout<<"write cyl"<<endl;
+      }
+// writeGIFTI(surf_graph_links_,"/Users/brian/git_repos/briview/conns.gii");
+surf_graph_links_.calculateNormals();
+
+ //      GLuint* vbos_nodes_;
+//          GLint vertexLoc, normalLoc, scalarLoc;
+      cout<<"render "<<vbos_nodes_[0]<<" "<<vbos_nodes_[1]<<endl;
+//      glBufferData_Vertices(surf_graph_nodes_,vbos_nodes_[0]);
+//glBufferData_Faces(surf_graph_nodes_,vbos_nodes_[1]);
+glBufferData_Vertices(surf_graph_links_,vbos_nodes_[2]);
+glBufferData_Faces(surf_graph_links_,vbos_nodes_[3]);
+
+
+//      fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
+cout<<"done render "<<endl;
+
+
+
+emit sig_updateGL();
+}
+
 void graphContainer::render()
 {
     if (vbos_nodes_ != NULL )
     {
-    cout<<"graph render "<<endl;
+    cout<<"graph render "<<glsl_programs[0]<<" "<<glsl_programs.size()<<endl;
 //    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
+        glUseProgram(glsl_programs[1]);
+       fslsurface_name::render( surf_graph_links_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[2] ,vbos_nodes_[3] );
+       fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
 
-        fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
 }
 }
 
+void graphContainer::setGLSLPrograms(const std::vector<GLuint> & progs)
+{
+    glsl_programs=progs;
+}
 
 
 };

@@ -104,7 +104,7 @@ namespace briview{
             return;
         if (surf_form->getCurrentSurfaceIndex() == -1)
             return;
-       // writeGIFTI(*v_surfaces[surf_form->getCurrentSurfaceIndex()],fileName.toStdString());
+         writeGIFTI(*v_surfaces[surf_form->getCurrentSurfaceIndex()],fileName.toStdString());
 
     }
     void SurfaceContainer::writeSurfaces( ofstream *fout) const
@@ -484,6 +484,7 @@ namespace briview{
             //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
              //   for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
               //  {
+
                 glUseProgram(glsl_programs.at(surf_glsl_programs.at(index)));
                 int loc_test = glGetUniformLocation(glsl_programs.at(surf_glsl_programs.at(index)),"r_lut");
 
@@ -534,7 +535,7 @@ namespace briview{
                 }
                // emit sig_updateGL();
             }
-        //    cout<<"done update"<<endl;
+           cout<<"done update colour table"<<endl;
         }
 
     void SurfaceContainer::updateColourBar()

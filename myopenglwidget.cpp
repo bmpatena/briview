@@ -1631,7 +1631,7 @@ void myOpenGLWidget::initializeGL()
 
     surfaces->setGLSLPrograms(progs);
     //surfaces->setGLSLProgramsColourBar(progs);
-
+    graph_->setGLSLPrograms(progs);
     images->setGLSLProgram(p_im_texture);
     images->setGLSLProgramCbar(p_light_dir_map_scalars);
 
@@ -1726,10 +1726,10 @@ images->renderColourBar();
 
 //  HERE  surfaces->renderOpaqueSurfaces();
     surfaces->renderOpaqueSurfaces();
-
+cout<<"render surfa es"<<endl;
     surfaces->renderOpaqueGlyphs();
     glUseProgram(p_light_dir_map_scalars);
-    //cout<<"render colour bar"<<endl;
+    cout<<"render colour bar"<<endl;
     surfaces->renderColourBar();
     //cout<<"done rende cbar"<<endl;
 
@@ -1740,9 +1740,10 @@ images->renderColourBar();
     glDepthMask(GL_FALSE);
     surfaces->renderTranslucentSurfaces();
     surfaces->renderTranslucentGlyphs();
-
-
-   graph_->render();
+cout<<"render graph"<<endl;
+    if (graph_->doRender())
+       graph_->render();
+    cout<<"done render graph"<<endl;
 
 
     glDepthMask(GL_TRUE);

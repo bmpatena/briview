@@ -126,6 +126,9 @@ graphContainer_->setVisible(0);
     connect(imageContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
     connect(marchingCubes_widget,SIGNAL(sig_apply()),this,SLOT(doMarchingCubes()));
 
+    connect(graphContainer_,SIGNAL(sig_copy_to_surfaces()),this, SLOT(copyGraphToSurfaces()));
+    connect(graphContainer_,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+
     //----------------------END SETUP ACTION CONNECTIONS (Toolbar)------------------//
 
     ui->openGLwidget->setImageContainer(&imageContainer);
@@ -309,6 +312,27 @@ void MainWindow::setUpMenu()
     openGraphAct->setCheckable(true);
     menu_graph->addAction(openGraphAct);
     connect(openGraphAct,SIGNAL(toggled(bool)),graphContainer_,SLOT(setVisible(bool)));
+
+
+}
+void MainWindow::copyGraphToSurfaces()
+{
+    cout<<"copyGraphToSurfaces "<<endl;
+    GLuint* vbos = new GLuint[2];
+
+    glGenBuffersARB(2,vbos);
+  //  surfaceContainer->addSurface(filename.toStdString(),vbos);
+//   addColourBarToSurface();
+     fslSurface<float,unsigned int> *graph_surf_nodes = new fslSurface<float,unsigned int>();
+   *graph_surf_nodes = graphContainer_->getGraphNodesAsSurface();
+    surfaceContainer->addSurface(graph_surf_nodes,vbos,"graph_nodes_to_surface");
+
+    GLuint* vbos_links = new GLuint[2];
+
+    glGenBuffersARB(2,vbos_links);
+    fslSurface<float,unsigned int> *graph_surf_links = new fslSurface<float,unsigned int>();
+  *graph_surf_links = graphContainer_->getGraphLinksAsSurface();
+   surfaceContainer->addSurface(graph_surf_links,vbos_links,"graph_links_to_surface");
 
 
 }
