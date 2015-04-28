@@ -30,6 +30,14 @@ connect(graph_form,SIGNAL(sig_updateGraph()),this,SIGNAL(sig_updateGL()));
 connect(graph_form,SIGNAL(sig_updateRadius(double)),this,SLOT(setRadius(double)));
 connect(graph_form,SIGNAL(sig_updateLinkRadius(double)),this,SLOT(setLinkRadius(double)));
 
+
+connect(graph_form,SIGNAL(sig_changedColourTableNode()),this, SLOT(updateColourTableNode()));
+//connect(graph_form,SIGNAL(sig_changedColourTableNodeSc()),this, SLOT(updateColourTableNodeSc()));
+
+connect(graph_form,SIGNAL(sig_changedColourTableLinks()),this, SLOT(updateColourTableLinks()));
+//connect(graph_form,SIGNAL(sig_changedColourTableLinksSc()),this, SLOT(updateColourTableLinksSc()));
+
+
 }
 
 graphContainer::~graphContainer()
@@ -44,6 +52,32 @@ graphContainer::~graphContainer()
 
 
 }
+
+//void graphContainer::updateColourTableNode()
+//{
+//cout<<"graphContainer updateColourTableNode "<<endl;
+//nodes_ctable = graph_form->getNodeColourTable();
+//}
+
+
+//void graphContainer::updateColourTableNodeSc()
+//{
+//    cout<<"graphContainer updateColourTableNodeSc "<<endl;
+
+//}
+//void graphContainer::updateColourTableLinks()
+//{
+//cout<<"graphContainer updateColourTableLinks "<<endl;
+//links_ctable = graph_form->getLinksColourTable();
+
+//}
+
+
+//void graphContainer::updateColourTableLinksSc()
+//{
+//    cout<<"graphContainer updateColourTableLinksSc "<<endl;
+
+//}
 
 
 void graphContainer::setVisible( bool visible )
@@ -132,7 +166,8 @@ void graphContainer::generateNodes( )
           fslSurface<float,unsigned int> surf_graph;
 cout<<"count  "<<count<<endl;
           makeSphere( surf_graph, radius_, 20 , 20 , vec3<float>(i_c->x,i_c->y,i_c->z) );
-          surf_graph.addScalars(count+1,"graph_index");
+          surf_graph.addScalars(count,"node_index");
+          surf_graph.setScalars(0);
           if (count == 0 )
               surf_graph_nodes_= surf_graph;
           else
@@ -193,6 +228,8 @@ void graphContainer::generateLinks( )
           fslSurface<float,unsigned int> surf_graph_conns;
 //          cout<<"makeCylinder  "<<endl;
           makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
+          surf_graph_conns.addScalars(i->strength,"edgeStrength");
+          surf_graph_conns.setScalars(0);
           if (count==0)
           {
               surf_graph_links_ = surf_graph_conns;
@@ -223,6 +260,96 @@ cout<<"done render "<<endl;
 emit sig_updateGL();
 }
 
+void graphContainer::setColourTableUniformLocations(const GLint & loc_r_lut_in,const GLint & loc_g_lut_in,const GLint & loc_b_lut_in, const GLint & loc_a_lut_in,const GLint & loc_sc_lut_in,const GLint & loc_r_lut_last_in,const GLint & loc_g_lut_last_in,const GLint & loc_b_lut_last_in,const GLint & loc_a_lut_last_in, const GLint & loc_sc_lut_last_in, const GLint & loc_low_clamp_in)
+{
+    loc_r_lut = loc_r_lut_in;
+    loc_g_lut = loc_g_lut_in;
+    loc_b_lut = loc_b_lut_in;
+    loc_a_lut = loc_a_lut_in;
+    loc_sc_lut = loc_sc_lut_in;
+
+            loc_r_lut_last = loc_r_lut_last_in;
+    loc_g_lut_last = loc_g_lut_last_in;
+    loc_b_lut_last = loc_b_lut_last_in;
+    loc_a_lut_last = loc_a_lut_last_in;
+    loc_sc_lut_last = loc_sc_lut_last_in;
+    loc_low_clamp = loc_low_clamp_in ;
+
+}
+
+void graphContainer::setColourTableNode(  )
+{
+//    nodes_ctable = graph_form->getNodeColourTable();
+//            glUseProgram(glsl_programs[1]);
+
+            glUniform4fv(loc_r_lut,1,nodes_ctable.r_lut);
+            glUniform4fv(loc_g_lut,1,nodes_ctable.g_lut);
+            glUniform4fv(loc_b_lut,1,nodes_ctable.b_lut);
+            glUniform4fv(loc_a_lut,1,nodes_ctable.a_lut);
+            glUniform4fv(loc_sc_lut,1,nodes_ctable.sc_lut);
+
+            glUniform2fv(loc_r_lut_last,1,nodes_ctable.r_lut + 4);
+            glUniform2fv(loc_g_lut_last,1,nodes_ctable.g_lut + 4);
+            glUniform2fv(loc_b_lut_last,1,nodes_ctable.b_lut + 4);
+            glUniform2fv(loc_a_lut_last,1,nodes_ctable.a_lut + 4);
+            glUniform2fv(loc_sc_lut_last,1,nodes_ctable.sc_lut + 4);
+
+            glUniform4fv(loc_low_clamp,1,nodes_ctable.low_clamp);
+}
+
+
+void graphContainer::updateColourTableNode(  )
+{//this update colour table now updates the GLSL colour table not the form
+    cout<<"update coour node table "<<endl;
+
+    //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
+     //   for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
+      //  {
+//setColourTableNode();
+    nodes_ctable = graph_form->getNodeColourTable();
+
+
+        emit sig_updateGL();
+
+   cout<<"done update colour table"<<endl;
+}
+void graphContainer::setColourTableLinks(  )
+{
+//    nodes_ctable = graph_form->getNodeColourTable();
+//            glUseProgram(glsl_programs[1]);
+    //        int loc_test = glGetUniformLocation(glsl_programs[1],"r_lut");
+           // v_ctables.at(*i_ind)=surf_form->getCurrentColourTable();
+            glUniform4fv(loc_r_lut,1,links_ctable.r_lut);
+            glUniform4fv(loc_g_lut,1,links_ctable.g_lut);
+            glUniform4fv(loc_b_lut,1,links_ctable.b_lut);
+            glUniform4fv(loc_a_lut,1,links_ctable.a_lut);
+            glUniform4fv(loc_sc_lut,1,links_ctable.sc_lut);
+    //cout<<"gluniform "<<endl;
+            glUniform2fv(loc_r_lut_last,1,links_ctable.r_lut + 4);
+            glUniform2fv(loc_g_lut_last,1,links_ctable.g_lut + 4);
+            glUniform2fv(loc_b_lut_last,1,links_ctable.b_lut + 4);
+            glUniform2fv(loc_a_lut_last,1,links_ctable.a_lut + 4);
+            glUniform2fv(loc_sc_lut_last,1,links_ctable.sc_lut + 4);
+
+            glUniform4fv(loc_low_clamp,1,links_ctable.low_clamp);
+
+}
+
+void graphContainer::updateColourTableLinks(  )
+{//this update colour table now updates the GLSL colour table not the form
+    cout<<"update coour links table "<<endl;
+    links_ctable = graph_form->getLinksColourTable();
+
+    //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
+     //   for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
+      //  {
+//        setColourTableLinks();
+
+        emit sig_updateGL();
+
+   cout<<"done update colour table"<<endl;
+}
+
 void graphContainer::render()
 {
     if (vbos_nodes_ != NULL )
@@ -230,7 +357,10 @@ void graphContainer::render()
     cout<<"graph render "<<glsl_programs[0]<<" "<<glsl_programs.size()<<endl;
 //    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
         glUseProgram(glsl_programs[1]);
+//        updateColourTableNode();
+        setColourTableLinks();
        fslsurface_name::render( surf_graph_links_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[2] ,vbos_nodes_[3] );
+       setColourTableNode();
        fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );
 
 }

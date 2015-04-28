@@ -775,6 +775,7 @@ void  myOpenGLWidget::setShaders() {
     surfaces->setVertexAttribLocs(InVertex_loc,InNormal_loc, InScalar_loc);
     images->setVertexAttribLocs(InVertex_loc,InNormal_loc, InScalar_loc);
     surfaces->setColourTableUniformLocations(loc_r_lut,loc_g_lut,loc_b_lut,loc_a_lut, loc_sc_lut,loc_r_lut_last,loc_g_lut_last,loc_b_lut_last,loc_a_lut_last,loc_sc_lut_last,loc_low_clamp);
+    graph_->setColourTableUniformLocations(loc_r_lut,loc_g_lut,loc_b_lut,loc_a_lut, loc_sc_lut,loc_r_lut_last,loc_g_lut_last,loc_b_lut_last,loc_a_lut_last,loc_sc_lut_last,loc_low_clamp);
 
 
   //  surfaces->setVertexAttribLocs(0,1, 2);
@@ -1631,6 +1632,9 @@ void myOpenGLWidget::initializeGL()
 
     surfaces->setGLSLPrograms(progs);
     //surfaces->setGLSLProgramsColourBar(progs);
+//    vector<GLuint> progs_graph;
+//    progs_graph.push_back(p_light_dir_map_scalars);//nodes
+//    progs_graph.push_back(p_light_dir_map_scalars);//links
     graph_->setGLSLPrograms(progs);
     images->setGLSLProgram(p_im_texture);
     images->setGLSLProgramCbar(p_light_dir_map_scalars);

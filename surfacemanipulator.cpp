@@ -16,17 +16,17 @@ SurfaceManipulator::SurfaceManipulator(QWidget *parent) :
 
 
     //    connect(ui->next_page,SIGNAL(released()),this,SLOT(nextPage()));
-     //   connect(ui->prev_page,SIGNAL(released()),this,SLOT(prevPage()));
+    //   connect(ui->prev_page,SIGNAL(released()),this,SLOT(prevPage()));
 
-        //surfselector
-        connect(ui->but_AppendSurfData, SIGNAL(released()),this,SIGNAL(sig_appendSurfaceData()));
-connect(ui->but_viewScData, SIGNAL(released()),this,SIGNAL(sig_changedScalarData()) );
-        //glyph characteristic
-        connect(ui->glyph_tip_radius, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
+    //surfselector
+    connect(ui->but_AppendSurfData, SIGNAL(released()),this,SIGNAL(sig_appendSurfaceData()));
+    connect(ui->but_viewScData, SIGNAL(released()),this,SIGNAL(sig_changedScalarData()) );
+    //glyph characteristic
+    connect(ui->glyph_tip_radius, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
     connect(ui->glyph_tip_height, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
     connect(ui->glyph_base_radius, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
-  //  connect(ui->glyph_base_height, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
-  connect(ui->glyph_scale, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
+    //  connect(ui->glyph_base_height, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
+    connect(ui->glyph_scale, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
     connect(ui->glyph_N_faces, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
     connect(ui->glyph_opacity, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedGlyphProperties()));
 
@@ -37,7 +37,7 @@ connect(ui->but_viewScData, SIGNAL(released()),this,SIGNAL(sig_changedScalarData
     connect(ui->con_inc  ,SIGNAL(pressed()),this,SLOT(increaseContrast()));
     connect(ui->level_dec  ,SIGNAL(pressed()),this,SLOT(decreaseLevel()));
     connect(ui->level_inc  ,SIGNAL(pressed()),this,SLOT(increaseLevel()));
-//surface material characteristics
+    //surface material characteristics
     connect(ui->ambient_r, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedSurfaceProperties()));
     connect(ui->ambient_g, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedSurfaceProperties()));
     connect(ui->ambient_b, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedSurfaceProperties()));
@@ -112,75 +112,75 @@ connect(ui->but_viewScData, SIGNAL(released()),this,SIGNAL(sig_changedScalarData
 
     connect(ui->radio_useScalars, SIGNAL(clicked(bool)),this,SIGNAL(sig_changeShaderProgram(bool)));
 
-  connect(ui->combo_preset_materials, SIGNAL(currentIndexChanged(int)),this,SIGNAL(sig_changeSurfaceMaterial(int)));
+    connect(ui->combo_preset_materials, SIGNAL(currentIndexChanged(int)),this,SIGNAL(sig_changeSurfaceMaterial(int)));
 
-  //--------------------------Colour Bar------------------------------------
-  connect(ui->cbar_origin_x, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
-  connect(ui->cbar_origin_y, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
-  connect(ui->cbar_origin_z, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
-  connect(ui->cbar_length, SIGNAL(textChanged(QString)),this,SIGNAL(sig_changedColourBar()));
-  connect(ui->cbar_width, SIGNAL(textChanged(QString)),this,SIGNAL(sig_changedColourBar()));
+    //--------------------------Colour Bar------------------------------------
+    connect(ui->cbar_origin_x, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->cbar_origin_y, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->cbar_origin_z, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->cbar_length, SIGNAL(textChanged(QString)),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->cbar_width, SIGNAL(textChanged(QString)),this,SIGNAL(sig_changedColourBar()));
 
-  connect(ui->cbar_width_dec, SIGNAL(pressed()),this,SLOT(cbar_width_dec()));
-  connect(ui->cbar_width_inc, SIGNAL(pressed()),this,SLOT(cbar_width_inc()));
-  connect(ui->cbar_length_dec, SIGNAL(pressed()),this,SLOT(cbar_length_dec()));
-  connect(ui->cbar_length_inc, SIGNAL(pressed()),this,SLOT(cbar_length_inc()));
+    connect(ui->cbar_width_dec, SIGNAL(pressed()),this,SLOT(cbar_width_dec()));
+    connect(ui->cbar_width_inc, SIGNAL(pressed()),this,SLOT(cbar_width_inc()));
+    connect(ui->cbar_length_dec, SIGNAL(pressed()),this,SLOT(cbar_length_dec()));
+    connect(ui->cbar_length_inc, SIGNAL(pressed()),this,SLOT(cbar_length_inc()));
 
-  connect(ui->cbar_title, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
-  connect(ui->surf_colour_bar_onoff, SIGNAL(released()),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->cbar_title, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourBar()));
+    connect(ui->surf_colour_bar_onoff, SIGNAL(released()),this,SIGNAL(sig_changedColourBar()));
 
- // ui->surface_props_stackedWidget->setCurrentIndex(0);
+    // ui->surface_props_stackedWidget->setCurrentIndex(0);
 
 
-  connect(ui->polyMode_f, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeFront(int)));
-  connect(ui->polyMode_b, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeBack(int)));
+    connect(ui->polyMode_f, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeFront(int)));
+    connect(ui->polyMode_b, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeBack(int)));
 
-  connect(ui->polyMode_f_glyph, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeFrontGlyph(int)));
-  connect(ui->polyMode_b_glyph, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeBackGlyph(int)));
+    connect(ui->polyMode_f_glyph, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeFrontGlyph(int)));
+    connect(ui->polyMode_b_glyph, SIGNAL(activated( int )),this,SIGNAL(sig_changedPolygonModeBackGlyph(int)));
 
     connect(ui->dispGlyphs,SIGNAL(clicked ( bool) ), this,SIGNAL(sig_displayGlyphs(bool)));
-connect(ui->culling,SIGNAL(clicked(bool)),this, SIGNAL(sig_enableCullFace(bool)));
-connect(ui->ff_ccw,SIGNAL(clicked(bool)),this, SIGNAL(sig_ff_ccw(bool)));
+    connect(ui->culling,SIGNAL(clicked(bool)),this, SIGNAL(sig_enableCullFace(bool)));
+    connect(ui->ff_ccw,SIGNAL(clicked(bool)),this, SIGNAL(sig_ff_ccw(bool)));
 
-///----------------
+    ///----------------
 
-connect(ui->but_doDockSurfaceList,SIGNAL(clicked()),this,SLOT(doDockSurfaceSelector()));
-connect(ui->but_doDockPolygon,SIGNAL(clicked()),this,SLOT(doDockPolygonMode()));
-connect(ui->but_doDockMaterial,SIGNAL(clicked()),this,SLOT(doDockMaterialProperties()));
-connect(ui->but_doDockColourMap,SIGNAL(clicked()),this,SLOT(doDockColourMap()));
-connect(ui->but_doDockGlyphs,SIGNAL(clicked()),this,SLOT(doDockGlyphs()));
-connect(ui->but_doDockColourBar,SIGNAL(clicked()),this,SLOT(doDockColourBar()));
+    connect(ui->but_doDockSurfaceList,SIGNAL(clicked()),this,SLOT(doDockSurfaceSelector()));
+    connect(ui->but_doDockPolygon,SIGNAL(clicked()),this,SLOT(doDockPolygonMode()));
+    connect(ui->but_doDockMaterial,SIGNAL(clicked()),this,SLOT(doDockMaterialProperties()));
+    connect(ui->but_doDockColourMap,SIGNAL(clicked()),this,SLOT(doDockColourMap()));
+    connect(ui->but_doDockGlyphs,SIGNAL(clicked()),this,SLOT(doDockGlyphs()));
+    connect(ui->but_doDockColourBar,SIGNAL(clicked()),this,SLOT(doDockColourBar()));
 
-///connnect the docking signal with showing the button to re-dock
-connect(ui->dock_surface_list,SIGNAL(topLevelChanged(bool)),ui->but_doDockSurfaceList,SLOT(setVisible(bool)));
-connect(ui->dockPolygons,SIGNAL(topLevelChanged(bool)),ui->but_doDockPolygon,SLOT(setVisible(bool)));
-connect(ui->dockMaterial,SIGNAL(topLevelChanged(bool)),ui->but_doDockMaterial,SLOT(setVisible(bool)));
-connect(ui->dockColourMap,SIGNAL(topLevelChanged(bool)),ui->but_doDockColourMap,SLOT(setVisible(bool)));
-connect(ui->dock_surf_glyphs,SIGNAL(topLevelChanged(bool)),ui->but_doDockGlyphs,SLOT(setVisible(bool)));
-connect(ui->dock_surf_colour_bar,SIGNAL(topLevelChanged(bool)),ui->but_doDockColourBar,SLOT(setVisible(bool)));
-//-------initialize UI configuration
-ui->but_doDockSurfaceList->hide();
-ui->but_doDockPolygon->hide();
-ui->but_doDockMaterial->hide();
-ui->but_doDockColourMap->hide();
-ui->but_doDockGlyphs->hide();
-ui->but_doDockColourBar->hide();
+    ///connnect the docking signal with showing the button to re-dock
+    connect(ui->dock_surface_list,SIGNAL(topLevelChanged(bool)),ui->but_doDockSurfaceList,SLOT(setVisible(bool)));
+    connect(ui->dockPolygons,SIGNAL(topLevelChanged(bool)),ui->but_doDockPolygon,SLOT(setVisible(bool)));
+    connect(ui->dockMaterial,SIGNAL(topLevelChanged(bool)),ui->but_doDockMaterial,SLOT(setVisible(bool)));
+    connect(ui->dockColourMap,SIGNAL(topLevelChanged(bool)),ui->but_doDockColourMap,SLOT(setVisible(bool)));
+    connect(ui->dock_surf_glyphs,SIGNAL(topLevelChanged(bool)),ui->but_doDockGlyphs,SLOT(setVisible(bool)));
+    connect(ui->dock_surf_colour_bar,SIGNAL(topLevelChanged(bool)),ui->but_doDockColourBar,SLOT(setVisible(bool)));
+    //-------initialize UI configuration
+    ui->but_doDockSurfaceList->hide();
+    ui->but_doDockPolygon->hide();
+    ui->but_doDockMaterial->hide();
+    ui->but_doDockColourMap->hide();
+    ui->but_doDockGlyphs->hide();
+    ui->but_doDockColourBar->hide();
 
-///----------------
-ui->surface_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
-//deafilts
-ui->radio_useScalars->setChecked(true);
+    ///----------------
+    ui->surface_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //deafilts
+    ui->radio_useScalars->setChecked(true);
 
 }
 void SurfaceManipulator::setCullFace(const bool & cull )
 {
-   // cout<<"setcull "<<cull<<endl;
+    // cout<<"setcull "<<cull<<endl;
     ui->culling->setChecked(cull);
 }
 
 void SurfaceManipulator::setFrontFace( const bool & CCW )
 {
-   // cout<<"set CCW "<<CCW<<endl;
+    // cout<<"set CCW "<<CCW<<endl;
     ui->ff_ccw->setChecked(CCW);
     ui->ff_cw->setChecked(!CCW);
 }

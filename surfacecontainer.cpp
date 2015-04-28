@@ -1370,7 +1370,8 @@ delete[] m;
         if (c_bar_onoff)
         {
        //cout<<"RenderColour "<<glsl_programs.size()<<endl;
-        glUseProgram(1);//glsl_programs.at(2));
+//        glUseProgram(1);//glsl_programs.at(2));
+        glUseProgram(glsl_programs.at(surf_glsl_programs.at(surf_form->getCurrentSurfaceIndex())));
 
         if (c_bar != NULL)
         {

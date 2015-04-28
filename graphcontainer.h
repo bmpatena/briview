@@ -33,6 +33,7 @@ public:
 
     fslsurface_name::fslSurface<float,unsigned int> getGraphNodesAsSurface() { return surf_graph_nodes_;}
     fslsurface_name::fslSurface<float,unsigned int> getGraphLinksAsSurface() { return surf_graph_links_;}
+    void setColourTableUniformLocations(const GLint & loc_r_lut_in,const GLint & loc_g_lut_in,const GLint & loc_b_lut_in, const GLint & loc_a_lut_in,const GLint & loc_sc_lut_in,const GLint & loc_r_lut_last_in,const GLint & loc_g_lut_last_in,const GLint & loc_b_lut_last_in,const GLint & loc_a_lut_last_in, const GLint & loc_sc_lut_last_in, const GLint & loc_low_clamp_in);
 
 signals:
 void sig_copy_to_surfaces();
@@ -44,7 +45,16 @@ public slots:
     void setRadius(  double  r_in );
     void setLinkRadius( );
     void setLinkRadius(  double  r_in );
+    void updateColourTableNode();
+//    void updateColourTableNodeSc();
+    void updateColourTableLinks();
+//    void updateColourTableLinksSc();
 private:
+
+    void setColourTableNode();
+    void setColourTableLinks();
+
+
     graphManipulator* graph_form;
     fslsurface_name::fslSurface<float,unsigned int> surf_graph_nodes_,surf_graph_links_;
  std::vector< GLuint > glsl_programs;
@@ -55,8 +65,10 @@ private:
     std::vector< std::string > v_names_;
 GLuint* vbos_nodes_;
     GLint vertexLoc, normalLoc, scalarLoc;
-
-
+    fslsurface_name::colour_table nodes_ctable, links_ctable;
+    GLint loc_r_lut,loc_g_lut,loc_b_lut,loc_a_lut,loc_sc_lut;
+    GLint loc_r_lut_last,loc_g_lut_last,loc_b_lut_last,loc_a_lut_last,loc_sc_lut_last;
+    GLint loc_low_clamp;
 };
 
 };
