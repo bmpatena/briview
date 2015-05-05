@@ -24,6 +24,9 @@ graphContainer::graphContainer(QObject *parent) : QObject(parent)
     normalLoc=1;
     scalarLoc=2;
 vbos_nodes_=NULL;
+
+loadColourTables((QApplication::applicationDirPath() + "/assets/colour_maps.txt").toStdString());
+
 //   vbos_vertices = new GLuint[2];
 connect(graph_form,SIGNAL(sig_copy_to_surfaces()),this,SIGNAL(sig_copy_to_surfaces()));
 connect(graph_form,SIGNAL(sig_updateGraph()),this,SIGNAL(sig_updateGL()));
@@ -34,10 +37,15 @@ connect(graph_form,SIGNAL(sig_updateLinkRadius(double)),this,SLOT(setLinkRadius(
 connect(graph_form,SIGNAL(sig_changedColourTableNode()),this, SLOT(updateColourTableNode()));
 //connect(graph_form,SIGNAL(sig_changedColourTableNodeSc()),this, SLOT(updateColourTableNodeSc()));
 
-connect(graph_form,SIGNAL(sig_changedColourTableLinks()),this, SLOT(updateColourTableLinks()));
-//connect(graph_form,SIGNAL(sig_changedColourTableLinksSc()),this, SLOT(updateColourTableLinksSc()));
+connect(graph_form,SIGNAL(sig_changedColourTableLinks()),this, SLOT(updateColourTableEdges()));
+//connect(graph_form,SIGNAL(sig_changedColourTableLinksSc()),this, SLOT(updateColourTableEdgesSc()));
+connect(graph_form, SIGNAL(sig_setColourTableNodeSc(int)),this, SLOT(setNodeCmapRange(int)));
+connect(graph_form, SIGNAL(sig_setColourTableEdgeSc(int)),this, SLOT(setEdgeCmapRange(int)));
 
+connect(graph_form, SIGNAL(sig_changedColourTableNode(int)),this,SLOT(changeColourTableNode(int)));
+connect(graph_form, SIGNAL(sig_changedColourTableEdge(int)),this,SLOT(changeColourTableEdge(int)));
 
+connect(graph_form, SIGNAL(sig_addScalars(QString)),this,SLOT(addScalars(QString)));
 }
 
 graphContainer::~graphContainer()
@@ -68,7 +76,7 @@ graphContainer::~graphContainer()
 //void graphContainer::updateColourTableLinks()
 //{
 //cout<<"graphContainer updateColourTableLinks "<<endl;
-//links_ctable = graph_form->getLinksColourTable();
+//edges_ctable = graph_form->getLinksColourTable();
 
 //}
 
@@ -79,7 +87,60 @@ graphContainer::~graphContainer()
 
 //}
 
+//void graphContainer::importPresetMaterials( const string & filename)
+//{
+//    ifstream fin(filename.c_str());
+//    string mat_name;
+//    while ( fin>> mat_name)
+//    {
+//        material mat;
+//        fin>> mat.ambient[0]>> mat.ambient[1]>> mat.ambient[2]>> mat.ambient[3]>> mat.diffuse[0]>> mat.diffuse[1]>> mat.diffuse[2]>> mat.diffuse[3]>> mat.specular[0]>> mat.specular[1]>> mat.specular[2]>> mat.specular[3]>> mat.shininess;
+//        mat.opacity=1.0;
+//        preset_materials.push_back(mat);
+//        preset_materials_names.push_back(mat_name);
 
+//        graph_form->addPresetSetMaterial(mat_name);
+//    }
+//}
+
+
+void graphContainer::loadColourTables(const string & filename )
+{
+    ifstream fin(filename.c_str());
+    string temp;
+
+    if (fin.is_open())
+    {
+        while (fin>>temp)
+        {
+            //cout<<"load colour map: "<<temp<<endl;
+            cmap_names.push_back(temp);
+            graph_form->addColourTable(temp);
+
+            float4 sclut,rlut,glut,blut,alut,clamp;
+            float2 scl,rl,gl,bl,al;
+
+            fin>>sclut.x>>sclut.y>>sclut.z>>sclut.w>>scl.x>>scl.y;
+            fin>>rlut.x>>rlut.y>>rlut.z>>rlut.w>>rl.x>>rl.y;
+            fin>>glut.x>>glut.y>>glut.z>>glut.w>>gl.x>>gl.y;
+            fin>>blut.x>>blut.y>>blut.z>>blut.w>>bl.x>>bl.y;
+            fin>>alut.x>>alut.y>>alut.z>>alut.w>>al.x>>al.y;
+            fin>>clamp.x>>clamp.y>>clamp.z>>clamp.w;
+
+            v_ctables.push_back(colour_table( rlut, rl, glut, gl, blut, bl, alut, al, sclut,scl,clamp.x, clamp.y, clamp.z, clamp.w));
+        }
+        if (cmap_names.size()>0)
+        {
+
+            graph_form->setColourTableNodeIndex(0);
+            graph_form->setColourTableEdgeIndex(0);
+
+        }
+    }else{
+        cerr<<"Colour map file, "<<filename<<", does not exist"<<endl;
+        exit (EXIT_FAILURE);
+    }
+}
 void graphContainer::setVisible( bool visible )
 {
     cout<<"set visible "<<endl;
@@ -114,6 +175,38 @@ void graphContainer::setLinkRadius(  )
     cout<<"setRadiusFromForm "<<radius_link_<<endl;
 
     generateLinks();
+}
+void graphContainer::setNodeCmapRange( int curIndex )
+{
+    //int curIndex = graph_form->getCurrentNodeScalarIndex();
+    vector<float>::const_iterator i = surf_graph_nodes_.const_scbegin(curIndex);
+    float min,max;
+    min = max = *i;
+
+    ++i;
+    for ( ; i != surf_graph_nodes_.const_scend(curIndex); ++i)
+    {
+        if (*i < min ) min = *i;
+        if (*i > max ) max = *i;
+    }
+    graph_form->setNodeCMAPRange(min,max);
+    updateColourTableNode();
+}
+void graphContainer::setEdgeCmapRange( int curIndex )
+{
+    //int curIndex = graph_form->getCurrentNodeScalarIndex();
+    vector<float>::const_iterator i = surf_graph_links_.const_scbegin(curIndex);
+    float min,max;
+    min = max = *i;
+
+    ++i;
+    for ( ; i != surf_graph_links_.const_scend(curIndex); ++i)
+    {
+        if (*i < min ) min = *i;
+        if (*i > max ) max = *i;
+    }
+    graph_form->setEdgeCMAPRange(min,max);
+    updateColourTableNode();
 }
 
 
@@ -168,6 +261,8 @@ cout<<"count  "<<count<<endl;
           makeSphere( surf_graph, radius_, 20 , 20 , vec3<float>(i_c->x,i_c->y,i_c->z) );
           surf_graph.addScalars(count,"node_index");
           surf_graph.setScalars(0);
+          graph_form->setNodesScalarsName("node_index",0);
+
           if (count == 0 )
               surf_graph_nodes_= surf_graph;
           else
@@ -230,6 +325,7 @@ void graphContainer::generateLinks( )
           makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
           surf_graph_conns.addScalars(i->strength,"edgeStrength");
           surf_graph_conns.setScalars(0);
+          graph_form->setEdgeScalarsName("edgeStrength",0);
           if (count==0)
           {
               surf_graph_links_ = surf_graph_conns;
@@ -296,9 +392,24 @@ void graphContainer::setColourTableNode(  )
 
             glUniform4fv(loc_low_clamp,1,nodes_ctable.low_clamp);
 }
-
-
-void graphContainer::updateColourTableNode(  )
+void graphContainer::addScalars( QString filename )
+{
+    ifstream fin(filename.toStdString().c_str());
+    if (fin.is_open())
+    {
+        string name, line;//right now assumes a single column
+        getline(fin,name);
+                while (getline(fin,line))
+        {
+            stringstream ss;
+            ss<<line;
+            float val;
+            ss>>val;
+        }
+        fin.close();
+    }
+}
+    void graphContainer::updateColourTableNode(  )
 {//this update colour table now updates the GLSL colour table not the form
     cout<<"update coour node table "<<endl;
 
@@ -313,32 +424,72 @@ void graphContainer::updateColourTableNode(  )
 
    cout<<"done update colour table"<<endl;
 }
-void graphContainer::setColourTableLinks(  )
+void graphContainer::changeColourTableNode(int index)
+{
+    cout<<"change colour table index GRAPH "<<index<<endl;
+
+          if (index >0)
+        {
+
+               memcpy(nodes_ctable.r_lut , v_ctables[index-1].r_lut, sizeof(float)*6);
+              memcpy(nodes_ctable.g_lut , v_ctables[index-1].g_lut, sizeof(float)*6);
+              memcpy(nodes_ctable.b_lut , v_ctables[index-1].b_lut, sizeof(float)*6);
+              memcpy(nodes_ctable.a_lut , v_ctables[index-1].a_lut, sizeof(float)*6);
+//            graph_form->setColourTableNodeNoSc(v_ctables[index-1]);
+            graph_form->setColourTableNodeNoSc(nodes_ctable);
+
+            setColourTableNode();
+                emit sig_updateGL();
+          }
+
+    //}
+}
+void graphContainer::changeColourTableEdge(int index)
+{
+    cout<<"change colour table index GRAPH "<<index<<endl;
+
+          if (index >0)
+        {
+
+               memcpy(edges_ctable.r_lut , v_ctables[index-1].r_lut, sizeof(float)*6);
+              memcpy(edges_ctable.g_lut , v_ctables[index-1].g_lut, sizeof(float)*6);
+              memcpy(edges_ctable.b_lut , v_ctables[index-1].b_lut, sizeof(float)*6);
+              memcpy(edges_ctable.a_lut , v_ctables[index-1].a_lut, sizeof(float)*6);
+//            graph_form->setColourTableNodeNoSc(v_ctables[index-1]);
+            graph_form->setColourTableEdgeNoSc(edges_ctable);
+
+            setColourTableEdge();
+                emit sig_updateGL();
+          }
+
+    //}
+}
+void graphContainer::setColourTableEdge(  )
 {
 //    nodes_ctable = graph_form->getNodeColourTable();
 //            glUseProgram(glsl_programs[1]);
     //        int loc_test = glGetUniformLocation(glsl_programs[1],"r_lut");
            // v_ctables.at(*i_ind)=surf_form->getCurrentColourTable();
-            glUniform4fv(loc_r_lut,1,links_ctable.r_lut);
-            glUniform4fv(loc_g_lut,1,links_ctable.g_lut);
-            glUniform4fv(loc_b_lut,1,links_ctable.b_lut);
-            glUniform4fv(loc_a_lut,1,links_ctable.a_lut);
-            glUniform4fv(loc_sc_lut,1,links_ctable.sc_lut);
+            glUniform4fv(loc_r_lut,1,edges_ctable.r_lut);
+            glUniform4fv(loc_g_lut,1,edges_ctable.g_lut);
+            glUniform4fv(loc_b_lut,1,edges_ctable.b_lut);
+            glUniform4fv(loc_a_lut,1,edges_ctable.a_lut);
+            glUniform4fv(loc_sc_lut,1,edges_ctable.sc_lut);
     //cout<<"gluniform "<<endl;
-            glUniform2fv(loc_r_lut_last,1,links_ctable.r_lut + 4);
-            glUniform2fv(loc_g_lut_last,1,links_ctable.g_lut + 4);
-            glUniform2fv(loc_b_lut_last,1,links_ctable.b_lut + 4);
-            glUniform2fv(loc_a_lut_last,1,links_ctable.a_lut + 4);
-            glUniform2fv(loc_sc_lut_last,1,links_ctable.sc_lut + 4);
+            glUniform2fv(loc_r_lut_last,1,edges_ctable.r_lut + 4);
+            glUniform2fv(loc_g_lut_last,1,edges_ctable.g_lut + 4);
+            glUniform2fv(loc_b_lut_last,1,edges_ctable.b_lut + 4);
+            glUniform2fv(loc_a_lut_last,1,edges_ctable.a_lut + 4);
+            glUniform2fv(loc_sc_lut_last,1,edges_ctable.sc_lut + 4);
 
-            glUniform4fv(loc_low_clamp,1,links_ctable.low_clamp);
+            glUniform4fv(loc_low_clamp,1,edges_ctable.low_clamp);
 
 }
 
-void graphContainer::updateColourTableLinks(  )
+void graphContainer::updateColourTableEdges(  )
 {//this update colour table now updates the GLSL colour table not the form
     cout<<"update coour links table "<<endl;
-    links_ctable = graph_form->getLinksColourTable();
+    edges_ctable = graph_form->getLinksColourTable();
 
     //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
      //   for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
@@ -358,7 +509,7 @@ void graphContainer::render()
 //    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
         glUseProgram(glsl_programs[1]);
 //        updateColourTableNode();
-        setColourTableLinks();
+        setColourTableEdge();
        fslsurface_name::render( surf_graph_links_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[2] ,vbos_nodes_[3] );
        setColourTableNode();
        fslsurface_name::render(surf_graph_nodes_, vertexLoc, normalLoc, scalarLoc,vbos_nodes_[0] ,vbos_nodes_[1] );

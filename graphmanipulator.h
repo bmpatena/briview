@@ -22,11 +22,30 @@ public:
     float getLinkRadius();
     fslsurface_name::colour_table getNodeColourTable();
     fslsurface_name::colour_table getLinksColourTable();
+    void setNodesScalarsName(const std::string name, const int & index);
+    void setEdgeScalarsName(const std::string name, const int & index);
+    int getCurrentNodeScalarIndex();
+    void setNodeCMAPRange(const float & min, const float & max);
+    void setEdgeCMAPRange(const float & min, const float & max);
+
+//    void addPresetSetMaterial(const string & name);
+    void setColourTableNodeIndex( const int & index);
+    void setColourTableEdgeIndex( const int & index);
+
+    void addColourTable(const std::string & filename );
+    void setColourTableNodeNoSc( const fslsurface_name::colour_table & ctable );
+    void setColourTableEdgeNoSc( const fslsurface_name::colour_table & ctable );
+
+
 
 public slots:
     //    void updateRadius();
     void updateRadius( int slide_r );
     void updateLinkRadius( int slide_r );
+    void addNodeScalars( );
+    void addEdgeScalars( );
+    void setNodeCmapRange();
+    void setEdgeCmapRange();
 
 signals:
     void sig_copy_to_surfaces();
@@ -39,6 +58,12 @@ signals:
     void sig_changedColourTableNodeSc();
     void sig_changedColourTableLinks();
     void sig_changedColourTableLinksSc();
+    void sig_setColourTableNodeSc(int index );
+    void sig_setColourTableEdgeSc(int index);
+    void sig_changedColourTableNode(int index);
+    void sig_changedColourTableEdge(int index);
+    void sig_addScalars( QString filename );
+
 private:
     Ui::graphManipulator_form *ui;
 };

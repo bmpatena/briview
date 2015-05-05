@@ -736,8 +736,10 @@ namespace briview{
     }
     void SurfaceContainer::addSurface( fslsurface_name::fslSurface<float,unsigned int> * surf, GLuint*  vbos, const string & surf_name)
     {
-        cout<<"add surgface "<<endl;
+        cout<<"add surgface2 "<<endl;
         //  gifti_read_image("aghahgs",1);
+        cout<<"add surgface2 "<<surf_name<<endl;
+
           surface_filenames.push_back(surf_name);
           frontFace.push_back(0);
           fill_type_b.push_back(GL_FILL);
@@ -745,7 +747,11 @@ namespace briview{
           fill_type_b_glyph.push_back(GL_FILL);
           fill_type_f_glyph.push_back(GL_FILL);
           v_glyph_exists.push_back(0);
+          cout<<"add surgface2.1 "<<surf_name<<endl;
+
           v_glyph_props.push_back(surf_form->getCurrentGlyph());
+          cout<<"add surgface2.2 "<<surf_name<<endl;
+
           surf_glsl_programs.push_back(0);
 
 
@@ -755,10 +761,10 @@ namespace briview{
          v_surfaces.push_back(surf);
     //surf->printScalars(0);
           surf->calculateNormals();
-  //cout<<"done surface normals"<<endl;
+  cout<<"done surface normals"<<endl;
           glBufferData_Vertices(*surf, vbos[0]);
           glBufferData_Faces(*surf, vbos[1]);
-  //cout<<"done buffering data"<<endl;
+  cout<<"done buffering data"<<endl;
       //  N_verts.push_back(surf->getNumberOfVertices() );
 
 
@@ -885,7 +891,7 @@ namespace briview{
           calculateNormals(vertices, indices,verts.size()/3, index_count );
   */
 
-  //cout<<"done add surface "<<endl;
+  cout<<"done add surface "<<endl;
 
     }
 
@@ -910,7 +916,7 @@ namespace briview{
     {
      //   cout<<"regen2 glyphs "<<v_glyph_props.size()<<" "<<v_vertices.size()<<" "<<v_vectors.size()<<" "<<N_verts.size()<<endl;
 
-        //cout<<"add glyphs2 "<<vbos_vertices.size()<<" "<<surf_index<<endl;
+        cout<<"add glyphs2 "<<vbos_vertices.size()<<" "<<surf_index<<endl;
     //    glBindBuffer(GL_ARRAY_BUFFER, vbos_vertices[surf_index][0]);
       //  vector< vertexFloat > surf_verts( N_verts[surf_index]);
       //  glGetBufferSubData(GL_ARRAY_BUFFER,0,N_verts.at(surf_index)*sizeof(fslsurface_name::vertexFloat),&surf_verts[0]);
@@ -933,7 +939,7 @@ namespace briview{
          //                    v_glyph_props[surf_index].scale_factor * v_glyph_props[surf_index].tip[0], v_glyph_props[surf_index].scale_factor * v_glyph_props[surf_index].base_radius,  v_glyph_props[surf_index].scale_factor, \
            //                  v_glyph_props[surf_index].tip[1], v_glyph_props[surf_index].N_faces );
         vbos_glyphs.push_back(vbos);
-     //   cout<<"done gen arrows"<<endl;
+        cout<<"done gen arrows"<<endl;
 //for (int i=0; i< vertices.size();i++)
 //    //cout<<vertices.at(i).x<<" "<<vertices.at(i).y<<" "<<vertices.at(i).z<<" "<<endl;
 
@@ -1182,7 +1188,10 @@ delete[] m;
     {
        // cout<<"render translucent "<<endl;
         glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc (GL_SRC_ALPHA,GL_ONE);
+        glBlendFunc (GL_ONE_MINUS_DST_COLOR,GL_DST_COLOR);
 
+glBlendEquation(GL_FUNC_ADD);
         for (unsigned int surf_ind = 0;surf_ind<vbos_vertices.size();surf_ind++)
         {
 

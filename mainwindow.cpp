@@ -493,11 +493,13 @@ void MainWindow::doAddImage()
 }
 void MainWindow::doAddSurface()
 {
+    cout<<"MainWindow::doAddSurface"<<endl;
     QStringList filenames = QFileDialog::getOpenFileNames(this,"Load Surface File (*.vtk,*.ply,*.gii,*.gii.gz)","./","*.vtk;*.ply;*.gii;*.gii.gz");
 
     for (QStringList::iterator i = filenames.begin() ; i != filenames.end(); ++i)
         addSurfaceToContainer(*i);
                               //filename);
+    cout<<"end MainWindow::doAddSurface"<<endl;
 
     //if (!filename.isNull())
 
@@ -529,24 +531,33 @@ void MainWindow::addGraphToContainer(const QString & filename )
 
 void MainWindow::addSurfaceToContainer(const QString & filename )
 {
+    cout<<"MainWindow::addSurfaceToContainer"<<endl;
+
     //need to valid vbos from this current context, 0:vertices, 1:incdices
     GLuint* vbos = new GLuint[2];
 
     glGenBuffersARB(2,vbos);
     surfaceContainer->addSurface(filename.toStdString(),vbos);
-    addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
+    cout<<"add glyphs"<<endl;
+
+//    addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
+    cout<<"add color bar"<<endl;
     addColourBarToSurface();
+    cout<<"done MainWindow::addSurfaceToContainer"<<endl;
+
 }
 
 void MainWindow::addSurfaceToContainer( fslsurface_name::fslSurface<float,unsigned int> * surface , const string & surf_name)
 {
+    cout<<"MainWindow::addSurfaceToContainer2"<<endl;
+
     //need to valid vbos from this current context, 0:vertices, 1:incdices
     GLuint* vbos = new GLuint[2];
 
     glGenBuffersARB(2,vbos);
      surfaceContainer->addSurface(surface,vbos,surf_name);
   //  surfaceContainer->addSurface(filename.toStdString(),vbos);
-   addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
+//   addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
    addColourBarToSurface();
 }
 
@@ -557,7 +568,7 @@ void MainWindow::appendSurfaceData(const QString & filename )
 
    // glGenBuffers(2,vbos);
     surfaceContainer->appendSurfaceData(filename.toStdString());
-   addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
+//   addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
    // addColourBarToSurface();
 }
 
@@ -568,10 +579,10 @@ void MainWindow::addGlyphsToSurface(const unsigned int & index)
     GLuint* vbos = new GLuint[2];
 
     glGenBuffersARB(2,vbos);
-    //cout<<"add gkyphs mainwindow2"<<endl;
+    cout<<"add gkyphs mainwindow2"<<endl;
 
     surfaceContainer->addGlyphs(index,vbos);
-    //cout<<"done add glyphs"<<endl;
+    cout<<"done add glyphs"<<endl;
 }
 
 void MainWindow::addColourBarToSurface()

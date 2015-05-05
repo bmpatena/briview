@@ -34,6 +34,7 @@ public:
     fslsurface_name::fslSurface<float,unsigned int> getGraphNodesAsSurface() { return surf_graph_nodes_;}
     fslsurface_name::fslSurface<float,unsigned int> getGraphLinksAsSurface() { return surf_graph_links_;}
     void setColourTableUniformLocations(const GLint & loc_r_lut_in,const GLint & loc_g_lut_in,const GLint & loc_b_lut_in, const GLint & loc_a_lut_in,const GLint & loc_sc_lut_in,const GLint & loc_r_lut_last_in,const GLint & loc_g_lut_last_in,const GLint & loc_b_lut_last_in,const GLint & loc_a_lut_last_in, const GLint & loc_sc_lut_last_in, const GLint & loc_low_clamp_in);
+//    void importPresetMaterials( const string & filename);
 
 signals:
 void sig_copy_to_surfaces();
@@ -47,12 +48,21 @@ public slots:
     void setLinkRadius(  double  r_in );
     void updateColourTableNode();
 //    void updateColourTableNodeSc();
-    void updateColourTableLinks();
-//    void updateColourTableLinksSc();
+    void updateColourTableEdges();
+//    void updateColourTableEdgesSc();
+    void setNodeCmapRange( int curIndex );
+    void setEdgeCmapRange( int curIndex );
+
+    void loadColourTables(const std::string & filename );
+    void changeColourTableNode(int index);
+    void changeColourTableEdge(int index);
+    void addScalars( QString filename );
+
+
 private:
 
     void setColourTableNode();
-    void setColourTableLinks();
+    void setColourTableEdge();
 
 
     graphManipulator* graph_form;
@@ -65,10 +75,15 @@ private:
     std::vector< std::string > v_names_;
 GLuint* vbos_nodes_;
     GLint vertexLoc, normalLoc, scalarLoc;
-    fslsurface_name::colour_table nodes_ctable, links_ctable;
+    fslsurface_name::colour_table nodes_ctable, edges_ctable;
+    std::vector< fslsurface_name::colour_table > v_ctables;
     GLint loc_r_lut,loc_g_lut,loc_b_lut,loc_a_lut,loc_sc_lut;
     GLint loc_r_lut_last,loc_g_lut_last,loc_b_lut_last,loc_a_lut_last,loc_sc_lut_last;
     GLint loc_low_clamp;
+
+    std::vector< std::string > cmap_names;
+
+
 };
 
 };
