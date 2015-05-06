@@ -69,10 +69,15 @@ namespace briview{
         connect(surf_form, SIGNAL(sig_displayGlyphs(bool)),this,SLOT(displayGlyphs(bool)));
         connect(surf_form, SIGNAL(sig_enableCullFace(bool)),this,SLOT(toggleCullFace(bool)));
         connect(surf_form, SIGNAL(sig_ff_ccw(bool)),this,SLOT(setFrontFaceCCW(bool)));
+
+        connect(surf_form,SIGNAL(sig_changedBlendFunc(int) ),this,SLOT(changeBlendFunc(int)));
+        connect(surf_form,SIGNAL(sig_changedOpacityMode(int)),this, SLOT(setOpacityMode(int)));
+
         c_bar=NULL;
         c_bar_onoff=false;
 //        surf_form->setUseScalarMap(1);
-
+        blendFunc=0;
+        rel_opacity=0;
 
     }
     SurfaceContainer::~SurfaceContainer( )
@@ -128,8 +133,17 @@ namespace briview{
             writeColourTable(*i_ctab,fout);
         }
     }
+    void SurfaceContainer::changeBlendFunc(int index)
+    {
+        blendFunc=index;
+        emit sig_updateGL();
+    }
+    void SurfaceContainer::setOpacityMode(int mode)
+    {
+        rel_opacity=mode;
+        emit sig_updateGL();
 
-
+    }
     void SurfaceContainer::importPresetMaterials( const string & filename)
     {
         ifstream fin(filename.c_str());
@@ -1131,8 +1145,29 @@ if (! indices->empty())
 delete[] m;
 
 
-        glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+//        glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    cout<<"surface-blendfunc "<<blendFunc<<endl;
+        switch (blendFunc)
+        {
 
+        case 0:
+            glBlendFunc( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case 1:
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+                    break;
+        case 2:
+                    glBlendFunc(GL_ONE_MINUS_DST_ALPHA , GL_ONE);
+                    break;
+        case 3:
+                    glBlendFunc(GL_SRC_ALPHA , GL_DST_ALPHA);
+                    break;
+        case 4:
+            glBlendFunc(GL_ONE_MINUS_DST_ALPHA , GL_DST_ALPHA);
+                    break;
+        default:
+            break;
+        }
         for (unsigned int surf_ind = 0;surf_ind<vbos_vertices.size();surf_ind++)
         {
             if (cullFace[surf_ind])

@@ -35,7 +35,6 @@ public:
     fslsurface_name::fslSurface<float,unsigned int> getGraphLinksAsSurface() { return surf_graph_links_;}
     void setColourTableUniformLocations(const GLint & loc_r_lut_in,const GLint & loc_g_lut_in,const GLint & loc_b_lut_in, const GLint & loc_a_lut_in,const GLint & loc_sc_lut_in,const GLint & loc_r_lut_last_in,const GLint & loc_g_lut_last_in,const GLint & loc_b_lut_last_in,const GLint & loc_a_lut_last_in, const GLint & loc_sc_lut_last_in, const GLint & loc_low_clamp_in);
 //    void importPresetMaterials( const string & filename);
-
 signals:
 void sig_copy_to_surfaces();
 void sig_updateGL();
@@ -57,14 +56,18 @@ public slots:
     void changeColourTableNode(int index);
     void changeColourTableEdge(int index);
     void addScalars( QString filename );
+    void changeBlendFunc(int index);
+    void setOpacityMode(int mode);
 
 
 private:
 
     void setColourTableNode();
     void setColourTableEdge();
+    int blendFunc;
+    bool rel_opacity;
 
-
+unsigned int Nverts_per_node;
     graphManipulator* graph_form;
     fslsurface_name::fslSurface<float,unsigned int> surf_graph_nodes_,surf_graph_links_;
  std::vector< GLuint > glsl_programs;

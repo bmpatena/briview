@@ -126,6 +126,10 @@ signals:
     void sig_displayGlyphs( bool disp );
     void sig_enableCullFace( bool cull );
     void sig_ff_ccw( bool checked );
+
+    void sig_changedBlendFunc(int);
+    void sig_changedOpacityMode(int);
+
 protected:
     void changeEvent(QEvent *e);
 

@@ -24,6 +24,9 @@ graphContainer::graphContainer(QObject *parent) : QObject(parent)
     normalLoc=1;
     scalarLoc=2;
 vbos_nodes_=NULL;
+blendFunc=0;
+rel_opacity=0;
+Nverts_per_node=0;
 
 loadColourTables((QApplication::applicationDirPath() + "/assets/colour_maps.txt").toStdString());
 
@@ -46,6 +49,12 @@ connect(graph_form, SIGNAL(sig_changedColourTableNode(int)),this,SLOT(changeColo
 connect(graph_form, SIGNAL(sig_changedColourTableEdge(int)),this,SLOT(changeColourTableEdge(int)));
 
 connect(graph_form, SIGNAL(sig_addScalars(QString)),this,SLOT(addScalars(QString)));
+
+connect(graph_form,SIGNAL(sig_changedBlendFunc(int) ),this,SLOT(changeBlendFunc(int)));
+connect(graph_form,SIGNAL(sig_changedOpacityMode(int)),this, SLOT(setOpacityMode(int)));
+
+
+
 }
 
 graphContainer::~graphContainer()
@@ -61,6 +70,17 @@ graphContainer::~graphContainer()
 
 }
 
+void graphContainer::changeBlendFunc(int index)
+{
+    blendFunc=index;
+    emit sig_updateGL();
+}
+void graphContainer::setOpacityMode(int mode)
+{
+    rel_opacity=mode;
+    emit sig_updateGL();
+
+}
 //void graphContainer::updateColourTableNode()
 //{
 //cout<<"graphContainer updateColourTableNode "<<endl;
@@ -264,10 +284,15 @@ cout<<"count  "<<count<<endl;
           graph_form->setNodesScalarsName("node_index",0);
 
           if (count == 0 )
+          {
               surf_graph_nodes_= surf_graph;
-          else
+              Nverts_per_node = surf_graph.getNumberOfVertices();
+          }else
+           {
               surf_graph_nodes_.append(surf_graph);
       }
+      }
+
 
 //      count = 0 ;
 //      for ( vector<conn>::iterator i = v_conn_.begin(); i != v_conn_.end(); ++i,++count)
@@ -397,6 +422,8 @@ void graphContainer::addScalars( QString filename )
     ifstream fin(filename.toStdString().c_str());
     if (fin.is_open())
     {
+        vector<float> scalars(surf_graph_nodes_.getNumberOfVertices(),0);
+        vector<float>::iterator i_sc = scalars.begin();
         string name, line;//right now assumes a single column
         getline(fin,name);
                 while (getline(fin,line))
@@ -405,8 +432,18 @@ void graphContainer::addScalars( QString filename )
             ss<<line;
             float val;
             ss>>val;
+            cout<<"add scalar for node "<<Nverts_per_node<<" "<<val<<endl;
+            for (int i = 0 ; i < Nverts_per_node; ++i,++i_sc )
+            {
+                *i_sc = val;
+                cout<<"val "<<i<<" "<<(*i_sc)<<endl;
+                }
+
         }
         fin.close();
+        cout<<"scalar size "<<scalars.size()<<" "<<scalars[scalars.size()-1]<<endl;
+        surf_graph_nodes_.addScalars(scalars,name);
+        graph_form->addNodeScalarsToList(name);
     }
 }
     void graphContainer::updateColourTableNode(  )
@@ -506,7 +543,30 @@ void graphContainer::render()
     if (vbos_nodes_ != NULL )
     {
     cout<<"graph render "<<glsl_programs[0]<<" "<<glsl_programs.size()<<endl;
-//    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
+    switch (blendFunc)
+    {
+
+    case 0:
+        glBlendFunc( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA);
+        break;
+    case 1:
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+                break;
+    case 2:
+                glBlendFunc(GL_ONE_MINUS_DST_ALPHA , GL_ONE);
+                break;
+    case 3:
+                glBlendFunc(GL_SRC_ALPHA , GL_DST_ALPHA);
+                break;
+    case 4:
+        glBlendFunc(GL_ONE_MINUS_DST_ALPHA , GL_DST_ALPHA);
+                break;
+    default:
+        break;
+    }
+
+
+    //    writeGIFTI(surf_graph_nodes_,"/Users/brian/git_repos/briview/nodes_render.gii");
         glUseProgram(glsl_programs[1]);
 //        updateColourTableNode();
         setColourTableEdge();

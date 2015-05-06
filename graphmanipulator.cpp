@@ -128,6 +128,11 @@ graphManipulator::graphManipulator(QWidget *parent) :
 connect(ui->but_node_setCRange,SIGNAL(pressed()),this,SLOT(setNodeCmapRange()) );
 connect(ui->but_edge_setCRange,SIGNAL(pressed()),this,SLOT(setEdgeCmapRange()) );
 
+connect(ui->combo_opacity, SIGNAL(activated (int) ),this,SIGNAL(sig_changedOpacityMode(int)));
+connect(ui->combo_blend, SIGNAL(activated (int) ),this,SIGNAL(sig_changedBlendFunc(int)));
+
+
+
 }
 
 graphManipulator::~graphManipulator()
@@ -191,9 +196,14 @@ void graphManipulator::setNodeCMAPRange(const float & min, const float & max)
 
 }
 
+void graphManipulator::addNodeScalarsToList( const string & name)
+{
+        ui->graphNodes_scalars_list->addItem(QString(name.c_str()));
+}
+
 void graphManipulator::addNodeScalars( )
 {
-    QString filename = QFileDialog::getOpenFileName(this,"Load Node Scalars From File (*.csv,*.txt)","./","*.csv,.txt");
+    QString filename = QFileDialog::getOpenFileName(this,"Load Node Scalars From File (*.csv *.txt)","./","Scalar File (*.csv *.txt)");
 
     if (!filename.isNull())
     {

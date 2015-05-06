@@ -103,6 +103,7 @@ namespace briview{
         void sliceSurfaceY();
         void setVisible( bool visible );
 
+
         //-----------DOCKING-------------//
         void showDockSurfaceSelector();
         void showDockMaterialProperties();
@@ -117,6 +118,8 @@ namespace briview{
         void doDockGlyphs();
         void doDockColourMap();
         void doDockPolygonMode();
+        void changeBlendFunc(int index);
+        void setOpacityMode(int mode);
 
 
         //--------------------------------//
@@ -127,6 +130,7 @@ namespace briview{
     signals:
         void sig_updateGL();
         void sig_appendSurfaceData();
+
     protected:
 
     private:
@@ -136,6 +140,8 @@ namespace briview{
         std::vector<GLenum> fill_type_b_glyph, fill_type_f_glyph;
         std::vector< std::string > cmap_names;
 
+        int blendFunc;
+        bool rel_opacity;
 
         SurfaceManipulator* surf_form;
         std::vector<briview::float3> v_cog;

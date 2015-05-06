@@ -142,6 +142,11 @@ SurfaceManipulator::SurfaceManipulator(QWidget *parent) :
     connect(ui->culling,SIGNAL(clicked(bool)),this, SIGNAL(sig_enableCullFace(bool)));
     connect(ui->ff_ccw,SIGNAL(clicked(bool)),this, SIGNAL(sig_ff_ccw(bool)));
 
+
+    connect(ui->combo_opacity, SIGNAL(activated (int) ),this,SIGNAL(sig_changedOpacityMode(int)));
+   connect(ui->combo_blend, SIGNAL(activated (int) ),this,SIGNAL(sig_changedBlendFunc(int)));
+
+
     ///----------------
 
     connect(ui->but_doDockSurfaceList,SIGNAL(clicked()),this,SLOT(doDockSurfaceSelector()));

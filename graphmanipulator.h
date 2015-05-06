@@ -35,6 +35,7 @@ public:
     void addColourTable(const std::string & filename );
     void setColourTableNodeNoSc( const fslsurface_name::colour_table & ctable );
     void setColourTableEdgeNoSc( const fslsurface_name::colour_table & ctable );
+    void addNodeScalarsToList( const std::string & name);
 
 
 
@@ -63,7 +64,8 @@ signals:
     void sig_changedColourTableNode(int index);
     void sig_changedColourTableEdge(int index);
     void sig_addScalars( QString filename );
-
+    void sig_changedBlendFunc(int);
+    void sig_changedOpacityMode(int);
 private:
     Ui::graphManipulator_form *ui;
 };
