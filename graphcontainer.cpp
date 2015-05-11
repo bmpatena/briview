@@ -27,6 +27,7 @@ vbos_nodes_=NULL;
 blendFunc=0;
 rel_opacity=0;
 Nverts_per_node=0;
+weightLinksByConnectivity=0;
 
 loadColourTables((QApplication::applicationDirPath() + "/assets/colour_maps.txt").toStdString());
 
@@ -53,7 +54,7 @@ connect(graph_form, SIGNAL(sig_addScalars(QString)),this,SLOT(addScalars(QString
 connect(graph_form,SIGNAL(sig_changedBlendFunc(int) ),this,SLOT(changeBlendFunc(int)));
 connect(graph_form,SIGNAL(sig_changedOpacityMode(int)),this, SLOT(setOpacityMode(int)));
 
-
+connect(graph_form,SIGNAL(sig_wEdgeStateChanged(int)),this, SLOT(setWegihtByEdge(int)));
 
 }
 
@@ -81,6 +82,12 @@ void graphContainer::setOpacityMode(int mode)
     emit sig_updateGL();
 
 }
+void graphContainer::setWegihtByEdge(int state)
+{
+    weightLinksByConnectivity=state;
+    generateLinks();
+}
+
 //void graphContainer::updateColourTableNode()
 //{
 //cout<<"graphContainer updateColourTableNode "<<endl;
@@ -345,6 +352,11 @@ void graphContainer::generateLinks( )
       for ( vector<conn>::iterator i = v_conn_.begin(); i != v_conn_.end(); ++i,++count)
       {
 
+          float radius = radius_link_;
+if (weightLinksByConnectivity>=0)
+{
+    radius += i->strength;
+}
           fslSurface<float,unsigned int> surf_graph_conns;
 //          cout<<"makeCylinder  "<<endl;
           makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));

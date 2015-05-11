@@ -58,7 +58,7 @@ public slots:
     void addScalars( QString filename );
     void changeBlendFunc(int index);
     void setOpacityMode(int mode);
-
+    void setWegihtByEdge(int state);
 
 private:
 
@@ -66,6 +66,8 @@ private:
     void setColourTableEdge();
     int blendFunc;
     bool rel_opacity;
+
+    int weightLinksByConnectivity;
 
 unsigned int Nverts_per_node;
     graphManipulator* graph_form;

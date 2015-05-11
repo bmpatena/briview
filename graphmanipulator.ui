@@ -47,7 +47,7 @@
          <x>0</x>
          <y>0</y>
          <width>667</width>
-         <height>1599</height>
+         <height>1622</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -121,6 +121,13 @@
          </layout>
         </item>
         <item>
+         <widget class="QCheckBox" name="check_wEdge">
+          <property name="text">
+           <string>Weight edges by connectivity</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="Line" name="line_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -156,6 +163,15 @@
           </item>
           <item>
            <widget class="QComboBox" name="combo_blend">
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <item>
              <property name="text">
               <string>GL_SRC_ALPHA / GL_ONE_MINUS_SRC_ALPHA</string>

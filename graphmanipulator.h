@@ -66,6 +66,7 @@ signals:
     void sig_addScalars( QString filename );
     void sig_changedBlendFunc(int);
     void sig_changedOpacityMode(int);
+    void sig_wEdgeStateChanged(int);
 private:
     Ui::graphManipulator_form *ui;
 };

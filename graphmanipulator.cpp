@@ -30,6 +30,7 @@ graphManipulator::graphManipulator(QWidget *parent) :
     connect(ui->sbox_rad_link,SIGNAL(valueChanged(double)),this, SIGNAL(sig_updateLinkRadius(double)) );
     connect(ui->hrzSliders_rad_link,SIGNAL(sliderMoved(int)),this, SLOT(updateLinkRadius(int)) );
 
+connect(ui->check_wEdge,SIGNAL(	stateChanged(int) ) ,this, SIGNAL(sig_wEdgeStateChanged(int)));
 
     //colour table
 
