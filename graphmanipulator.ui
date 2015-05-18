@@ -47,7 +47,7 @@
          <x>0</x>
          <y>0</y>
          <width>667</width>
-         <height>1622</height>
+         <height>1638</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -121,11 +121,35 @@
          </layout>
         </item>
         <item>
-         <widget class="QCheckBox" name="check_wEdge">
-          <property name="text">
-           <string>Weight edges by connectivity</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="check_wEdge">
+            <property name="text">
+             <string>Weight edges by connectivity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="sbox_radLinkSc">
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Contrast</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="Line" name="line_5">
@@ -291,13 +315,6 @@
            </spacer>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_5">
@@ -596,7 +613,7 @@
          </widget>
         </item>
         <item>
-         <widget class="Line" name="line_3">
+         <widget class="Line" name="line_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -896,6 +913,13 @@
             </layout>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
          </widget>
         </item>
         <item>

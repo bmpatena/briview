@@ -70,6 +70,7 @@ signals:
     void sig_changedOpacityMode(int);
     void sig_wEdgeStateChanged(int);
     void sig_changedScalarData();
+    void sig_linkSc(double);
 private:
     Ui::graphManipulator_form *ui;
 };

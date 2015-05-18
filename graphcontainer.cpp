@@ -28,7 +28,7 @@ blendFunc=0;
 rel_opacity=0;
 Nverts_per_node=0;
 weightLinksByConnectivity=0;
-
+linkRadScale=1.0f;
 loadColourTables((QApplication::applicationDirPath() + "/assets/colour_maps.txt").toStdString());
 
 //   vbos_vertices = new GLuint[2];
@@ -36,7 +36,7 @@ connect(graph_form,SIGNAL(sig_copy_to_surfaces()),this,SIGNAL(sig_copy_to_surfac
 connect(graph_form,SIGNAL(sig_updateGraph()),this,SIGNAL(sig_updateGL()));
 connect(graph_form,SIGNAL(sig_updateRadius(double)),this,SLOT(setRadius(double)));
 connect(graph_form,SIGNAL(sig_updateLinkRadius(double)),this,SLOT(setLinkRadius(double)));
-
+connect(graph_form,SIGNAL(sig_linkSc(double)),this,SLOT(setLinkRadiusSc(double)));
 
 connect(graph_form,SIGNAL(sig_changedColourTableNode()),this, SLOT(updateColourTableNode()));
 //connect(graph_form,SIGNAL(sig_changedColourTableNodeSc()),this, SLOT(updateColourTableNodeSc()));
@@ -57,7 +57,7 @@ connect(graph_form, SIGNAL(sig_changedScalarData()),this,SLOT(changeScalarData()
 connect(graph_form,SIGNAL(sig_changedBlendFunc(int) ),this,SLOT(changeBlendFunc(int)));
 connect(graph_form,SIGNAL(sig_changedOpacityMode(int)),this, SLOT(setOpacityMode(int)));
 
-connect(graph_form,SIGNAL(sig_wEdgeStateChanged(int)),this, SLOT(setWegihtByEdge(int)));
+connect(graph_form,SIGNAL(sig_wEdgeStateChanged(int)),this, SLOT(setWeightByEdge(int)));
 
 }
 
@@ -73,6 +73,13 @@ graphContainer::~graphContainer()
 
 
 }
+void graphContainer::setLinkRadiusSc(double scale)
+{
+    linkRadScale=scale;
+    generateLinks();
+
+   emit sig_updateGL();
+}
 
 void graphContainer::changeBlendFunc(int index)
 {
@@ -85,8 +92,9 @@ void graphContainer::setOpacityMode(int mode)
     emit sig_updateGL();
 
 }
-void graphContainer::setWegihtByEdge(int state)
+void graphContainer::setWeightByEdge(int state)
 {
+    cout<<"weightState "<<state<<endl;
     weightLinksByConnectivity=state;
     generateLinks();
 }
@@ -194,6 +202,9 @@ void graphContainer::setRadius(  double r_in )
     {//0 is set by default in generate nodes
         graph_form->setCurrentNodeScalarIndex(index);
         changeScalarData();
+    }else{
+        emit sig_updateGL();
+
     }
 
     delete surf_graph_orig;
@@ -219,7 +230,10 @@ int index = graph_form->getCurrentNodeScalarIndex();
     {//0 is set by default in generate nodes
     graph_form->setCurrentNodeScalarIndex(index);
     changeScalarData();
-}
+}else{
+        emit sig_updateGL();
+
+    }
 
     delete surf_graph_orig;
 }
@@ -389,11 +403,13 @@ void graphContainer::generateLinks( )
           float radius = radius_link_;
 if (weightLinksByConnectivity>=0)
 {
-    radius += i->strength;
+    cout<<"weightLinksByConnectivity "<<(i->strength)<<endl;
+
+    radius += i->strength * linkRadScale;
 }
           fslSurface<float,unsigned int> surf_graph_conns;
 //          cout<<"makeCylinder  "<<endl;
-          makeCylinder( surf_graph_conns, radius_link_,radius_link_ , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
+          makeCylinder( surf_graph_conns, radius,radius , 20, 20, vec3<float>(v_cog_[i->src].x,v_cog_[i->src].y,v_cog_[i->src].z),vec3<float>(v_cog_[i->dest].x,v_cog_[i->dest].y,v_cog_[i->dest].z));
           surf_graph_conns.addScalars(i->strength,"edgeStrength");
           surf_graph_conns.setScalars(0);
           graph_form->setEdgeScalarsName("edgeStrength",0);

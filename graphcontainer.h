@@ -58,7 +58,8 @@ public slots:
     void addScalars( QString filename );
     void changeBlendFunc(int index);
     void setOpacityMode(int mode);
-    void setWegihtByEdge(int state);
+    void setWeightByEdge(int state);
+    void setLinkRadiusSc(double scale);
     void changeScalarData();
 
 private:
@@ -67,7 +68,7 @@ private:
     void setColourTableEdge();
     int blendFunc;
     bool rel_opacity;
-
+float linkRadScale;
     int weightLinksByConnectivity;
 
 unsigned int Nverts_per_node;
