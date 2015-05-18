@@ -21,6 +21,12 @@ graphManipulator::graphManipulator(QWidget *parent) :
     ui->sbox_rad_link->setSingleStep(0.1);
     ui->hrzSliders_rad_link->setSingleStep(1);
     ui->hrzSliders_rad_link->setRange(1,100);
+
+
+    //connect(ui->but_AppendSurfData, SIGNAL(released()),this,SIGNAL(sig_appendSurfaceData()));
+    connect(ui->but_viewScData, SIGNAL(released()),this,SIGNAL(sig_changedScalarData()) );
+
+
     connect(ui->but_cp2surf,SIGNAL(pressed()),this,SIGNAL(sig_copy_to_surfaces()));
     connect(ui->but_renderGraph,SIGNAL(released()),this, SIGNAL(sig_updateGraph()));
     connect(ui->sbox_rad,SIGNAL(valueChanged(double)),this, SIGNAL(sig_updateRadius(double)) );
@@ -257,19 +263,21 @@ int graphManipulator::getCurrentNodeScalarIndex(){
     return  ui->graphNodes_scalars_list->currentRow();
 }
 
+void graphManipulator::setCurrentNodeScalarIndex( int row ){
+
+     ui->graphNodes_scalars_list->setCurrentRow(row);
+}
+
 void graphManipulator::setNodesScalarsName(const std::string name, const int & index)
 {
-
-    if (ui->graphNodes_scalars_list->count() > index )
+    if (( ui->graphNodes_scalars_list->count() == 0 ) && ( index == 0 ))
+    {
+        ui->graphNodes_scalars_list->addItem(QString(name.c_str()));
+        ui->graphNodes_scalars_list->setCurrentRow(index);
+    }else if (ui->graphNodes_scalars_list->count() > index )
     {
         ui->graphNodes_scalars_list->item(index)->setText(QString(name.c_str()));
         ui->graphNodes_scalars_list->setCurrentRow(index);
-    }else if (index == 0 )//special behavior for 0 position
-    {
-
-        ui->graphNodes_scalars_list->addItem(QString(name.c_str()));
-        ui->graphNodes_scalars_list->setCurrentRow(index);
-
     }
 
 }

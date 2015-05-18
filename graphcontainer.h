@@ -59,6 +59,7 @@ public slots:
     void changeBlendFunc(int index);
     void setOpacityMode(int mode);
     void setWegihtByEdge(int state);
+    void changeScalarData();
 
 private:
 
@@ -87,7 +88,7 @@ GLuint* vbos_nodes_;
     GLint loc_low_clamp;
 
     std::vector< std::string > cmap_names;
-
+    bool nodesExist;
 
 };
 

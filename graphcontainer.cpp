@@ -50,6 +50,9 @@ connect(graph_form, SIGNAL(sig_changedColourTableNode(int)),this,SLOT(changeColo
 connect(graph_form, SIGNAL(sig_changedColourTableEdge(int)),this,SLOT(changeColourTableEdge(int)));
 
 connect(graph_form, SIGNAL(sig_addScalars(QString)),this,SLOT(addScalars(QString)));
+connect(graph_form, SIGNAL(sig_changedScalarData()),this,SLOT(changeScalarData()));
+
+
 
 connect(graph_form,SIGNAL(sig_changedBlendFunc(int) ),this,SLOT(changeBlendFunc(int)));
 connect(graph_form,SIGNAL(sig_changedOpacityMode(int)),this, SLOT(setOpacityMode(int)));
@@ -180,7 +183,22 @@ void graphContainer::setRadius(  double r_in )
 {
     cout<<"setRadius "<<endl;
     radius_ = r_in;
+
+    fslSurface<float,unsigned int>* surf_graph_orig = new  fslSurface<float,unsigned int>(surf_graph_nodes_);
+    int index = graph_form->getCurrentNodeScalarIndex();
+
     generateNodes();
+    surf_graph_nodes_.copyScalars(*surf_graph_orig);
+    //    surf_graph_nodes_.setScalars(graph_form->getCurrentNodeScalarIndex());
+    if (index > 0)
+    {//0 is set by default in generate nodes
+        graph_form->setCurrentNodeScalarIndex(index);
+        changeScalarData();
+    }
+
+    delete surf_graph_orig;
+
+
 }
 void graphContainer::setLinkRadius(  double r_in )
 {
@@ -192,8 +210,18 @@ void graphContainer::setRadius(  )
 {
     radius_ = graph_form->getRadius();
     cout<<"setRadiusFromForm "<<radius_<<endl;
-
+    fslSurface<float,unsigned int>* surf_graph_orig = new  fslSurface<float,unsigned int>(surf_graph_nodes_);
+int index = graph_form->getCurrentNodeScalarIndex();
     generateNodes();
+    surf_graph_nodes_.copyScalars(*surf_graph_orig);
+//    surf_graph_nodes_.setScalars(graph_form->getCurrentNodeScalarIndex());
+    if (index > 0)
+    {//0 is set by default in generate nodes
+    graph_form->setCurrentNodeScalarIndex(index);
+    changeScalarData();
+}
+
+    delete surf_graph_orig;
 }
 
 void graphContainer::setLinkRadius(  )
@@ -284,22 +312,28 @@ void graphContainer::generateNodes( )
       for ( typename vector< float3 >::iterator i_c = v_cog_.begin(); i_c != v_cog_.end(); ++i_c,++count )
       {
           fslSurface<float,unsigned int> surf_graph;
-cout<<"count  "<<count<<endl;
+          cout<<"count  "<<count<<endl;
           makeSphere( surf_graph, radius_, 20 , 20 , vec3<float>(i_c->x,i_c->y,i_c->z) );
           surf_graph.addScalars(count,"node_index");
-          surf_graph.setScalars(0);
-          graph_form->setNodesScalarsName("node_index",0);
+
+//          int index = graph_form->getCurrentNodeScalarIndex();
+//          if (index==-1) index=0;
+
+//          surf_graph.setScalars(0);
 
           if (count == 0 )
           {
               surf_graph_nodes_= surf_graph;
               Nverts_per_node = surf_graph.getNumberOfVertices();
           }else
-           {
+          {
               surf_graph_nodes_.append(surf_graph);
-      }
+          }
       }
 
+surf_graph_nodes_.setScalars(0);
+      graph_form->setNodesScalarsName("node_index",0);
+//    graph_form->setCurrentNodeScalarIndex(index)
 
 //      count = 0 ;
 //      for ( vector<conn>::iterator i = v_conn_.begin(); i != v_conn_.end(); ++i,++count)
@@ -336,7 +370,7 @@ cout<<"done render "<<endl;
 
 
 
-emit sig_updateGL();
+//emit sig_updateGL();
 }
 
 void graphContainer::generateLinks( )
@@ -458,6 +492,29 @@ void graphContainer::addScalars( QString filename )
         graph_form->addNodeScalarsToList(name);
     }
 }
+void graphContainer::changeScalarData()
+{
+    //        /////cout<<"change scalar data "<<surf_form->getCurrentAppendedSurfaceIndex()<<" "<<scalar_indices[surf_form->getCurrentAppendedSurfaceIndex()]<<endl;
+    //plus one because first load surface
+    //cout<<"change scalar data "<<endl;
+    cout<<"void graphContainer::changeScalarData() "<<graph_form->getCurrentNodeScalarIndex()<<endl;
+    if (graph_form->getCurrentNodeScalarIndex() == -1 )
+        return;
+
+    vector<int> scalar_inds = surf_graph_nodes_.getScalarIndices(graph_form->getCurrentNodeScalarIndex()); //+1 to adjust for initial surf
+    if (!scalar_inds.empty()){
+        cout<<"scalar index "<<scalar_inds[0]<<" "<<scalar_inds.size()<<endl;
+
+        //cout<<"set scalars "<<scalar_inds[0]<<endl;
+        surf_graph_nodes_.setScalars(scalar_inds[0]);//account for original surface
+        glBufferSubData_Vertices( surf_graph_nodes_,vbos_nodes_[0]);
+
+        emit sig_updateGL();
+    }
+
+}
+
+
     void graphContainer::updateColourTableNode(  )
 {//this update colour table now updates the GLSL colour table not the form
     cout<<"update coour node table "<<endl;

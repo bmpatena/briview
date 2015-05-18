@@ -25,6 +25,8 @@ public:
     void setNodesScalarsName(const std::string name, const int & index);
     void setEdgeScalarsName(const std::string name, const int & index);
     int getCurrentNodeScalarIndex();
+    void setCurrentNodeScalarIndex( int row );
+
     void setNodeCMAPRange(const float & min, const float & max);
     void setEdgeCMAPRange(const float & min, const float & max);
 
@@ -67,6 +69,7 @@ signals:
     void sig_changedBlendFunc(int);
     void sig_changedOpacityMode(int);
     void sig_wEdgeStateChanged(int);
+    void sig_changedScalarData();
 private:
     Ui::graphManipulator_form *ui;
 };
