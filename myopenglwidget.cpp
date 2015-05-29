@@ -1728,6 +1728,8 @@ void myOpenGLWidget::paintGL()
 images->renderColourBar();
     //render command handles the progam setting
 
+    surfaces->setEyeCentre(scene_props->getCameraEye(), scene_props->getCameraCenter());
+
 //  HERE  surfaces->renderOpaqueSurfaces();
     surfaces->renderOpaqueSurfaces();
 cout<<"render surfa es"<<endl;
@@ -1742,6 +1744,8 @@ cout<<"render surfa es"<<endl;
     glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
     glDepthMask(GL_FALSE);
+
+
     surfaces->renderTranslucentSurfaces();
     surfaces->renderTranslucentGlyphs();
 cout<<"render graph"<<endl;

@@ -1204,6 +1204,8 @@ delete[] m;
                 glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,v_materials.at(surf_ind).shininess);
                 glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR, v_materials.at(surf_ind).specular);
                 ////cout<<"render "<<v_surfaces.size()<<" "<<surf_ind<<" "<<vertexLoc<<" "<<normalLoc<<" "<<scalarLoc<<endl;
+                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
+
                 render<float,unsigned int>(*v_surfaces[surf_ind], vertexLoc,normalLoc,scalarLoc,vbos_vertices.at(surf_ind)[0] ,vbos_vertices.at(surf_ind)[1] );
 
             }
@@ -1221,10 +1223,11 @@ delete[] m;
     }
     void SurfaceContainer::renderTranslucentSurfaces()
     {
-       // cout<<"render translucent "<<endl;
+        cout<<"render translucent "<<endl;
         glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        glBlendFunc (GL_SRC_ALPHA,GL_ONE);
-        glBlendFunc (GL_ONE_MINUS_DST_COLOR,GL_DST_COLOR);
+//        glBlendFunc (GL_SRC_ALPHA,GL_ONE);
+//        glBlendFunc (GL_ONE_MINUS_DST_COLOR,GL_DST_COLOR);
+
 
 glBlendEquation(GL_FUNC_ADD);
         for (unsigned int surf_ind = 0;surf_ind<vbos_vertices.size();surf_ind++)
@@ -1264,6 +1267,8 @@ glBlendEquation(GL_FUNC_ADD);
                 glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,v_materials.at(surf_ind).shininess);
                 glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR, v_materials.at(surf_ind).specular);
 
+                cout<<"sort triangles "<<surf_ind<<endl;
+                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
                render<float,unsigned int>( *v_surfaces[surf_ind], vertexLoc,normalLoc,scalarLoc,vbos_vertices.at(surf_ind)[0] ,vbos_vertices.at(surf_ind)[1] );
 
             }
@@ -1274,6 +1279,64 @@ glBlendEquation(GL_FUNC_ADD);
             glDisable(GL_CULL_FACE);
         }
       //  cout<<"done render translucent "<<endl;
+
+    }
+    void SurfaceContainer::sortTriangles(fslsurface_name::fslSurface<float,unsigned int>* surf ,const unsigned int & surf_index, const  briview::float3 & _eye, const  briview::float3 & _centre)
+    {
+        cout<<"sort triangles "<<_centre.x<<" "<<_centre.y<<" "<<_centre.z<<endl;
+        cout<<"sort triangles "<<_eye.x<<" "<<_eye.y<<" "<<_eye.z<<endl;
+        //calculate centroid
+        vec3<float> veye(_eye.x,_eye.y,_eye.z);
+        vec3<float> ray(_centre.x-_eye.x,_centre.y-_eye.y,_centre.z-_eye.z);
+
+        cout<<"sort ray "<<ray.x<<" "<<ray.y<<" "<<ray.z<<endl;
+ray.normalize();
+        cout<<"sort ray "<<ray.x<<" "<<ray.y<<" "<<ray.z<<endl;
+
+
+        list< pair<float,unsigned int> > l_z_2_index(surf->getNumberOfFaces());
+        {//calculate view specific distances
+        list< pair<float,unsigned int> >::iterator i_z = l_z_2_index.begin();
+        typename std::vector< fslsurface_name::vertex<float> >::const_iterator i_v =  surf->const_vbegin() ;
+        unsigned int index=0;
+        for (std::vector< unsigned int >::const_iterator i =  surf->const_facebegin(); i != surf->const_faceend(); ++i,++i_z,++index)
+        {
+            vec3<float> cent = (i_v + *i)->coord();
+            ++i;
+            cent+=  (i_v + *i)->coord();
+            ++i;
+            cent+=  (i_v + *i)->coord();
+            cent/=3;
+
+            float z = ray.x * (cent.x - _eye.x) + ray.y * (cent.y - _eye.y) + ray.z * (cent.z - _eye.z);
+
+            *i_z = pair<float,unsigned int>(z,index);
+        }
+        }
+        l_z_2_index.sort();
+//        cout<<"sorted tris "<<endl;
+        {
+            vector< unsigned int > tris_sorted(surf->getNumberOfFaces()*3);
+            std::vector< unsigned int >::iterator i_fs = tris_sorted.begin();
+            std::vector< unsigned int >::const_iterator i_f =  surf->const_facebegin();
+            for ( list< pair<float,unsigned int> >::reverse_iterator i_z = l_z_2_index.rbegin(); i_z != l_z_2_index.rend(); ++i_z,++i_fs )
+            {
+//                cout<<"tri/z "<<i_z->second<<" "<<i_z->first<<endl;
+                *i_fs = *(i_f + i_z->second * 3 );
+                ++i_fs;
+                *i_fs = *(i_f + i_z->second * 3 +1 );
+                ++i_fs;
+                *i_fs = *(i_f + i_z->second * 3 +2 );
+            }
+
+//            for (std::vector< unsigned int >::iterator i_fs = tris_sorted.begin(); i_fs != tris_sorted.end(); ++i_fs)
+//            {
+//                cout<<"tris "<<(*i_fs)<<endl;
+//            }
+            surf->setFaces(tris_sorted);
+
+        }
+        glBufferData_Faces(*surf,vbos_vertices[surf_index][1]);
 
     }
 

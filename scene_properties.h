@@ -29,6 +29,9 @@ namespace briview{
         void set_gluPersp_params(const fslsurface_name::float4 & gluPersp_params);
       //  void updatePageText();
 
+        briview::float3 getCameraCenter() { return center; }
+        briview::float3 getCameraEye() { return eye; }
+
         void setCameraCenter(const briview::float3 & cog);
         void setCameraEye(const briview::float3 & eye_in);
         void setWindowSize(const int & w, const int & h);

@@ -47,6 +47,10 @@ namespace briview{
 
         briview::float3 normal(const  briview::float3 & v1, const briview::float3 & v2 );
 
+        void sortTriangles(fslsurface_name::fslSurface<float,unsigned int>* surf ,const unsigned int & surf_index,  const  briview::float3 & _eye, const  briview::float3 & _centre);
+
+
+    void setEyeCentre(const  briview::float3 & eye_in, const  briview::float3 & centre_in ){_eye = eye_in; _centre = centre_in; }
 
         void setAmbient(const unsigned int & surf_ind, const fslsurface_name::float4 & rgba );
         void setDiffuse(const unsigned int & surf_ind, const fslsurface_name::float4 & rgba );
@@ -151,6 +155,8 @@ namespace briview{
     //    std::vector< std::vector<int> > scalar_indices;
      //   std::vector< int > scalar_indices;
 //
+         briview::float3  _eye, _centre;
+
         std::vector<GLuint*> vbos_vertices;
     //    std::vector<fslsurface_name::vertexFloat*> v_vertices;
      //   std::vector<fslsurface_name::float3*> v_vectors;
