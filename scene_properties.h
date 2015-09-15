@@ -81,12 +81,17 @@ namespace briview{
         //camera and projection
         void setCameraParameters();
         void addLight();
-        void emitMouseMode();
+//        void emitMouseMode();
 
     signals:
         void sig_updateGL();
         void sig_changedMouseSensitivity(int sens);
         void sig_changedMouseMode(int mode);
+        void sig_but_up();
+        void sig_but_down();
+        void sig_but_left();
+        void sig_but_right();
+
     protected:
         void changeEvent(QEvent *e);
         void set_GlobalLightAmbientText();

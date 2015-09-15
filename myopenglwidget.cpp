@@ -1,18 +1,17 @@
 #include "myopenglwidget.h"
 #include <sstream>
-using namespace std;
-//using namespace briview_structs;
-using namespace briview;
-using namespace fslsurface_name;
 #include<QDir>
 #include "misc.h"
 #include <cmath>
 #define PI 3.14159265
 
+using namespace std;
+using namespace briview;
+using namespace fslsurface_name;
 
 myOpenGLWidget::myOpenGLWidget(QWidget *parent) : QGLWidget(parent) {
     mouseSensitivity=1;
-    mouseMode=0;   
+    mouseMode=0;
     mouseInMotion=false;
     mouseInMotionCount=0;
 
@@ -31,7 +30,7 @@ myOpenGLWidget::~myOpenGLWidget() {
     glDeleteProgram(p_im_texture);
 
 #ifdef GL_GLEXT_PROTOTYPES 
-	glDeleteFramebuffersEXT(1,&fbo);
+    glDeleteFramebuffersEXT(1,&fbo);
     glDeleteRenderbuffersEXT(2, rbo);
 #else
     glDeleteFramebuffers(1,&fbo);
@@ -46,10 +45,10 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
     TIFF *file;
     GLfloat *image, *p;
     int i;
-//height=2;
+
     file = TIFFOpen(filename.c_str(), "w");
     if (file == NULL) {
-      return 1;
+        return 1;
     }
     image = (GLfloat *) malloc(width * height * sizeof(GLfloat) * 3);
 
@@ -64,16 +63,16 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
 
     glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, image);
 
- //   for (int i = 0 ; i < 10; ++i)
-   //        cout<<"image "<<sizeof(GL_FLOAT)<<" "<<image[i]<<endl;
+    //   for (int i = 0 ; i < 10; ++i)
+    //        cout<<"image "<<sizeof(GL_FLOAT)<<" "<<image[i]<<endl;
 
 
     TIFFSetField(file, TIFFTAG_IMAGEWIDTH, (uint32) width);
     TIFFSetField(file, TIFFTAG_IMAGELENGTH, (uint32) height);
     TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, sizeof(GL_FLOAT)*8);
     TIFFSetField(file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-//TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-   TIFFSetField(file, TIFFTAG_COMPRESSION, compression);
+    //TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+    TIFFSetField(file, TIFFTAG_COMPRESSION, compression);
     TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
     TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -81,12 +80,12 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
     TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, "OpenGL-rendered using brview");
     p = image;
     for (i = height - 1; i >= 0; i--) {
-          if (TIFFWriteScanline(file, p, i, 0) < 0) {
-              free(image);
+        if (TIFFWriteScanline(file, p, i, 0) < 0) {
+            free(image);
             TIFFClose(file);
             return 1;
-          }
-      p += width*3;// * sizeof(GLfloat) * 3;
+        }
+        p += width*3;// * sizeof(GLfloat) * 3;
     }
     TIFFClose(file);
 }
@@ -102,100 +101,92 @@ int myOpenGLWidget::animateCameraMotion( const bool & write,const unsigned int &
     float tz_step = par_anim.tz /nframes;
     float theta_step = par_anim.theta/180.0*PI /nframes;
     float phi_step = par_anim.phi/180.0*PI /nframes;
-cout<<"par anim "<<par_anim.theta<<" "<<par_anim.phi<<" "<<par_anim.duration<<" "<<fps<<" "<<nframes<<endl;
     for (unsigned int i = 0 ; i < nframes; ++i,++i_frame)
     {
-     //   if (progressD.wasCanceled())
-     //       break;
-       // progressD.setValue(i);
-
-           cout<<"frame : "<<i_frame<<" "<<tx_step<<" "<<ty_step<<" "<<tz_step<<" "<<theta_step<<" "<<phi_step<<endl;
-           cout<<"frame : "<<i<<" "<<i*tx_step<<" "<<i*ty_step<<" "<<i*tz_step<<" "<<i*theta_step<<" "<<i*phi_step<<endl;
-
+        //do translation and rotation
         translateAndRotate(tx_step,ty_step,tz_step,theta_step,phi_step);
 
-
+        //Only write file, if write is enabed
+        //Otherwise it serves as a preview
         if (write)
         {
+            //Going to write out each frame
+            //Numbering the frames
+            //I then concatenate into mp4 using ffmpeg
+            //Eventualy will use the library directly
+            stringstream ss;
+            ss<<i_frame;
+            string snum;
+            ss>>snum;
+
+            if (i_frame<10)
+                snum="00000"+snum;
+            else if (i_frame<100)
+                snum="0000"+snum;
+            else if (i_frame<1000)
+                snum="000"+snum;
+            else if (i_frame<10000)
+                snum="00"+snum;
+            else if (i_frame<100000)
+                snum="0"+snum;
 
 
-        stringstream ss;
-        ss<<i_frame;
-        string snum;
-        ss>>snum;
+            QString imname(("/frame_" + snum + ".tiff").c_str() );
+            imname.prepend(mdir.absolutePath());
+            cout<<"fnamenew "<<imname.toStdString()<<endl;
+            writeTIFF(width, height,imname.toStdString(), compression);
 
-        if (i_frame<10)
-            snum="00000"+snum;
-        else if (i_frame<100)
-             snum="0000"+snum;
-        else if (i_frame<1000)
-             snum="000"+snum;
-        else if (i_frame<10000)
-             snum="00"+snum;
-        else if (i_frame<100000)
-             snum="0"+snum;
-
-
-        QString imname(("/frame_" + snum + ".tiff").c_str() );
-        imname.prepend(mdir.absolutePath());
-        cout<<"fnamenew "<<imname.toStdString()<<endl;
-        writeTIFF(width, height,imname.toStdString(), compression);
-
-        QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
-        imname_jpg.prepend(mdir.absolutePath());
-        QString program = "convert";
-          QStringList arguments;
+            QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
+            imname_jpg.prepend(mdir.absolutePath());
+            QString program = "convert";
+            QStringList arguments;
             arguments <<"-quality"<<"100"<<imname<< imname_jpg;
-cout<<imname_jpg.toStdString()<<endl;
-          QProcess *myProcess = new QProcess();
-          myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
-          myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
+            cout<<imname_jpg.toStdString()<<endl;
+            QProcess *myProcess = new QProcess();
+            myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
+            myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
 
             myProcess->start(program, arguments);
-          myProcess->waitForFinished(-1);
-          // myProcess->close();
-          cout<<"done convert "<<imname_jpg.toStdString()<<endl;
-           program.clear();
-           program.append("rm");
-           arguments.clear();
-           arguments<<imname;
-           myProcess->start(program, arguments);
-         myProcess->waitForFinished(-1);
+            myProcess->waitForFinished(-1);
 
-         delete myProcess;
-          cout<<"done remove_file"<<endl;
+            program.clear();
+            program.append("rm");
+            arguments.clear();
+            arguments<<imname;
+            myProcess->start(program, arguments);
+            myProcess->waitForFinished(-1);
+
+            delete myProcess;
         }
-        //animate(animationParams);
-
     }
 
 }
 int myOpenGLWidget::animateSliceMotion( const bool & write,const unsigned int & compression, const animationParams & par_anim , const float & fps, unsigned int & i_frame)
 {
     cout<<"animate slice "<<par_anim.duration<<" "<<fps<<endl;
-  //  bool write = false;
+    //  bool write = false;
     unsigned int nframes = static_cast<unsigned int>( par_anim.duration* fps + 0.5);
     cout<<"animate slice2 "<<nframes<<endl;
     QDir mdir("/tmp/brimovie");
 
     unsigned int x_1_vox,y_1_vox,z_1_vox;
-     unsigned int x_2_vox,y_2_vox,z_2_vox;
-     bool x_1_on, y_1_on,z_1_on;
-     bool x_2_on, y_2_on,z_2_on;
+    unsigned int x_2_vox,y_2_vox,z_2_vox;
+    bool x_1_on, y_1_on,z_1_on;
+    bool x_2_on, y_2_on,z_2_on;
 
-cout<<"turn on "<<par_anim.x_1_on<<" "<<par_anim.y_1_on<<" "<<par_anim.z_1_on<<endl;
-     images->turnOnOffSliceX( par_anim.x_1_on );
-     images->turnOnOffSliceY( par_anim.y_1_on );
-     images->turnOnOffSliceZ( par_anim.z_1_on );
-     vec3<float> start(par_anim.x_1_vox,par_anim.y_1_vox,par_anim.z_1_vox);
-     vec3<float> end(par_anim.x_2_vox,par_anim.y_2_vox,par_anim.z_2_vox);
-     image_dims dims =  images->getCurrentImageDims();
-cout<<"stend "<<start.x<<" "<<start.y<<" "<<start.z<<"stend "<<end.x<<" "<<end.y<<" "<<end.z<<endl;
-     vec3<float> step = vec3<float>((end.x-start.x)/nframes,(end.y-start.y)/nframes,(end.z-start.z)/nframes);
-     for (unsigned int i = 0 ; i < nframes; ++i,++i_frame)
-     {
-         cout<<"frame "<<i_frame<<" "<< (start.y+i*step.y)*dims.ydim<<endl;
-         images->changeSliceX( (start.x+i*step.x)*dims.xdim );
+    cout<<"turn on "<<par_anim.x_1_on<<" "<<par_anim.y_1_on<<" "<<par_anim.z_1_on<<endl;
+    images->turnOnOffSliceX( par_anim.x_1_on );
+    images->turnOnOffSliceY( par_anim.y_1_on );
+    images->turnOnOffSliceZ( par_anim.z_1_on );
+    vec3<float> start(par_anim.x_1_vox,par_anim.y_1_vox,par_anim.z_1_vox);
+    vec3<float> end(par_anim.x_2_vox,par_anim.y_2_vox,par_anim.z_2_vox);
+    image_dims dims =  images->getCurrentImageDims();
+    cout<<"stend "<<start.x<<" "<<start.y<<" "<<start.z<<"stend "<<end.x<<" "<<end.y<<" "<<end.z<<endl;
+    vec3<float> step = vec3<float>((end.x-start.x)/nframes,(end.y-start.y)/nframes,(end.z-start.z)/nframes);
+    for (unsigned int i = 0 ; i < nframes; ++i,++i_frame)
+    {
+        cout<<"frame "<<i_frame<<" "<< (start.y+i*step.y)*dims.ydim<<endl;
+        images->changeSliceX( (start.x+i*step.x)*dims.xdim );
         images->changeSliceY(  (start.y+i*step.y)*dims.ydim );
         images->changeSliceZ(  (start.z+i*step.z)*dims.zdim  );
 
@@ -204,61 +195,61 @@ cout<<"stend "<<start.x<<" "<<start.y<<" "<<start.z<<"stend "<<end.x<<" "<<end.y
         {
 
 
-        stringstream ss;
-        ss<<i_frame;
-        string snum;
-        ss>>snum;
+            stringstream ss;
+            ss<<i_frame;
+            string snum;
+            ss>>snum;
 
-        if (i_frame<10)
-            snum="00000"+snum;
-        else if (i_frame<100)
-             snum="0000"+snum;
-        else if (i_frame<1000)
-             snum="000"+snum;
-        else if (i_frame<10000)
-             snum="00"+snum;
-        else if (i_frame<100000)
-             snum="0"+snum;
+            if (i_frame<10)
+                snum="00000"+snum;
+            else if (i_frame<100)
+                snum="0000"+snum;
+            else if (i_frame<1000)
+                snum="000"+snum;
+            else if (i_frame<10000)
+                snum="00"+snum;
+            else if (i_frame<100000)
+                snum="0"+snum;
 
 
-        QString imname(("/frame_" + snum + ".tiff").c_str() );
-        imname.prepend(mdir.absolutePath());
-        cout<<"fnamenew "<<imname.toStdString()<<endl;
-        writeTIFF(width, height,imname.toStdString(), compression);
+            QString imname(("/frame_" + snum + ".tiff").c_str() );
+            imname.prepend(mdir.absolutePath());
+            cout<<"fnamenew "<<imname.toStdString()<<endl;
+            writeTIFF(width, height,imname.toStdString(), compression);
 
-        QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
-        imname_jpg.prepend(mdir.absolutePath());
-        QString program = "convert";
-          QStringList arguments;
+            QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
+            imname_jpg.prepend(mdir.absolutePath());
+            QString program = "convert";
+            QStringList arguments;
             arguments <<"-quality"<<"100"<<imname<< imname_jpg;
-cout<<imname_jpg.toStdString()<<endl;
-          QProcess *myProcess = new QProcess();
-          myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
-          myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
+            cout<<imname_jpg.toStdString()<<endl;
+            QProcess *myProcess = new QProcess();
+            myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
+            myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
 
             myProcess->start(program, arguments);
-          myProcess->waitForFinished(-1);
-          // myProcess->close();
-          cout<<"done convert "<<imname_jpg.toStdString()<<endl;
-           program.clear();
-           program.append("rm");
-           arguments.clear();
-           arguments<<imname;
-           myProcess->start(program, arguments);
-         myProcess->waitForFinished(-1);
+            myProcess->waitForFinished(-1);
+            // myProcess->close();
+            cout<<"done convert "<<imname_jpg.toStdString()<<endl;
+            program.clear();
+            program.append("rm");
+            arguments.clear();
+            arguments<<imname;
+            myProcess->start(program, arguments);
+            myProcess->waitForFinished(-1);
 
-         delete myProcess;
-          cout<<"done remove_file"<<endl;
+            delete myProcess;
+            cout<<"done remove_file"<<endl;
         }
 
 
 
 
     }
-     images->turnOnOffSliceX( par_anim.x_2_on );
-     images->turnOnOffSliceY( par_anim.y_2_on );
-     images->turnOnOffSliceZ( par_anim.z_2_on );
-     cout<<"turn on "<<par_anim.x_2_on<<" "<<par_anim.y_2_on<<" "<<par_anim.z_2_on<<endl;
+    images->turnOnOffSliceX( par_anim.x_2_on );
+    images->turnOnOffSliceY( par_anim.y_2_on );
+    images->turnOnOffSliceZ( par_anim.z_2_on );
+    cout<<"turn on "<<par_anim.x_2_on<<" "<<par_anim.y_2_on<<" "<<par_anim.z_2_on<<endl;
 
 
 
@@ -267,26 +258,26 @@ cout<<imname_jpg.toStdString()<<endl;
 
 int myOpenGLWidget::animate( const bool & write,const unsigned int & compression, const animationParams & par_anim , const float & fps, unsigned int & i_frame)
 {
-   // enum AnimationType { Start, CameraMotion, SliceMoving };
-        AnimationType type = par_anim.type;
-        switch (type){
-            case Start:
-                cout<<"set start"<<endl;
-                scene_props->setCameraParameters(par_anim.eye,par_anim.centre,par_anim.vup);
-                updateGL();
+    // enum AnimationType { Start, CameraMotion, SliceMoving };
+    AnimationType type = par_anim.type;
+    switch (type){
+    case Start:
+        cout<<"set start"<<endl;
+        scene_props->setCameraParameters(par_anim.eye,par_anim.centre,par_anim.vup);
+        updateGL();
 
-              break;
-        case CameraMotion:
-            cout<<"do camera motion "<<fps<<endl;
-            animateCameraMotion(write,compression,par_anim, fps,i_frame);
-            break;
-        case SliceMoving:
-            animateSliceMotion(write, compression,par_anim, fps,i_frame);
+        break;
+    case CameraMotion:
+        cout<<"do camera motion "<<fps<<endl;
+        animateCameraMotion(write,compression,par_anim, fps,i_frame);
+        break;
+    case SliceMoving:
+        animateSliceMotion(write, compression,par_anim, fps,i_frame);
 
-            break;
-           default:
-             break;
-        }
+        break;
+    default:
+        break;
+    }
 
 }
 int myOpenGLWidget::renderCaptureList(const string & filename, const bool & write, const unsigned int & compression, const vector< animationParams > & v_animation , const float & fps)
@@ -296,11 +287,11 @@ int myOpenGLWidget::renderCaptureList(const string & filename, const bool & writ
 
     if (write)
     {
-    cout<<"does exist"<<endl;
-    if ( ! mdir.mkdir(mdir.absolutePath()) )
+        cout<<"does exist"<<endl;
+        if ( ! mdir.mkdir(mdir.absolutePath()) )
         {
             //remove files.
-        cout<<"remove old file"<<endl;
+            cout<<"remove old file"<<endl;
             QStringList files = mdir.entryList();
             for ( QList<QString>::iterator file = files.begin(); file != files.end();file=file+1)
             {
@@ -309,8 +300,8 @@ int myOpenGLWidget::renderCaptureList(const string & filename, const bool & writ
         }
     }
     cout<<"render Capture List"<<endl;
-   // QProgressDialog progressD("Rendering Frames of Movie...", "Abort Render", 0, nframes, this);
-     // progressD.setWindowModality(Qt::WindowModal);
+    // QProgressDialog progressD("Rendering Frames of Movie...", "Abort Render", 0, nframes, this);
+    // progressD.setWindowModality(Qt::WindowModal);
     unsigned int frame=0;
 
     for ( vector< animationParams >::const_iterator i_a = v_animation.begin(); i_a != v_animation.end();++i_a )
@@ -322,26 +313,26 @@ int myOpenGLWidget::renderCaptureList(const string & filename, const bool & writ
     if (write)
     {
         QProgressDialog progressD2("Merging Images into Movie...", "Abort Render", 0, 10, this);
-           progressD2.setWindowModality(Qt::WindowModal);
-    //create movie
-           if (QFile::exists(QString(filename.c_str())))
-               QFile::remove(QString(filename.c_str()));
+        progressD2.setWindowModality(Qt::WindowModal);
+        //create movie
+        if (QFile::exists(QString(filename.c_str())))
+            QFile::remove(QString(filename.c_str()));
 
-cout<<"Creating movie from Images..."<<endl;
-progressD2.setValue(1);
+        cout<<"Creating movie from Images..."<<endl;
+        progressD2.setValue(1);
 
-    QString program = "ffmpeg";
-      QStringList arguments;
-      QString stemp;
-      stemp.setNum(fps);
-      arguments<<"-i"<<"/tmp/brimovie/frame_%06d.jpg"<<"-qmin"<<"1"<<"-qmax"<<"1"<<"-r"<<stemp<<filename.c_str();
-    QProcess *myProcess = new QProcess();
-   myProcess->setStandardOutputFile("/tmp/brimovie/ffmpeg.txt");
-    myProcess->setStandardErrorFile("/tmp/brimovie/ffmpeg.log");
-    myProcess->start(program, arguments);
-     myProcess->waitForFinished(-1);
-     cout<<"ffmpeg -i /tmp/brimovie/frame_%06d.jpg -qmin 1 -qmax 1 -r "<<stemp.toStdString()<<" "<<filename.c_str()<<endl;
-/*
+        QString program = "ffmpeg";
+        QStringList arguments;
+        QString stemp;
+        stemp.setNum(fps);
+        arguments<<"-i"<<"/tmp/brimovie/frame_%06d.jpg"<<"-qmin"<<"1"<<"-qmax"<<"1"<<"-r"<<stemp<<filename.c_str();
+        QProcess *myProcess = new QProcess();
+        myProcess->setStandardOutputFile("/tmp/brimovie/ffmpeg.txt");
+        myProcess->setStandardErrorFile("/tmp/brimovie/ffmpeg.log");
+        myProcess->start(program, arguments);
+        myProcess->waitForFinished(-1);
+        cout<<"ffmpeg -i /tmp/brimovie/frame_%06d.jpg -qmin 1 -qmax 1 -r "<<stemp.toStdString()<<" "<<filename.c_str()<<endl;
+        /*
     cout<<"Images have been merged..."<<endl;
     program.clear();
     program.append("rm");
@@ -373,10 +364,10 @@ progressD2.setValue(1);
     myProcess->start(program, arguments);
      myProcess->waitForFinished(-1);
 */
-    delete myProcess;
+        delete myProcess;
 
-    progressD2.setValue(10);
-}
+        progressD2.setValue(10);
+    }
 
 
 }
@@ -403,11 +394,11 @@ int myOpenGLWidget::renderCapture( const string & filename  , const bool & write
 
     if (write)
     {
-    cout<<"does exist"<<endl;
-    if ( ! mdir.mkdir(mdir.absolutePath()) )
+        cout<<"does exist"<<endl;
+        if ( ! mdir.mkdir(mdir.absolutePath()) )
         {
             //remove files.
-        cout<<"remove old file"<<endl;
+            cout<<"remove old file"<<endl;
             QStringList files = mdir.entryList();
             for ( QList<QString>::iterator file = files.begin(); file != files.end();file=file+1)
             {
@@ -416,7 +407,7 @@ int myOpenGLWidget::renderCapture( const string & filename  , const bool & write
         }
     }
     QProgressDialog progressD("Rendering Frames of Movie...", "Abort Render", 0, nframes, this);
-       progressD.setWindowModality(Qt::WindowModal);
+    progressD.setWindowModality(Qt::WindowModal);
 
     for (unsigned int i = 0 ; i < nframes; ++i)
     {
@@ -424,8 +415,8 @@ int myOpenGLWidget::renderCapture( const string & filename  , const bool & write
             break;
         progressD.setValue(i);
 
-           cout<<"frame : "<<i<<" "<<tx_step<<" "<<ty_step<<" "<<tz_step<<" "<<theta_step<<" "<<phi_step<<endl;
-           cout<<"frame : "<<i<<" "<<i*tx_step<<" "<<i*ty_step<<" "<<i*tz_step<<" "<<i*theta_step<<" "<<i*phi_step<<endl;
+        cout<<"frame : "<<i<<" "<<tx_step<<" "<<ty_step<<" "<<tz_step<<" "<<theta_step<<" "<<phi_step<<endl;
+        cout<<"frame : "<<i<<" "<<i*tx_step<<" "<<i*ty_step<<" "<<i*tz_step<<" "<<i*theta_step<<" "<<i*phi_step<<endl;
 
         translateAndRotate(tx_step,ty_step,tz_step,theta_step,phi_step);
         //animate(animationParams);
@@ -434,51 +425,51 @@ int myOpenGLWidget::renderCapture( const string & filename  , const bool & write
         {
 
 
-        stringstream ss;
-        ss<<i;
-        string snum;
-        ss>>snum;
+            stringstream ss;
+            ss<<i;
+            string snum;
+            ss>>snum;
 
-        if (i<10)
-            snum="00000"+snum;
-        else if (i<100)
-             snum="0000"+snum;
-        else if (i<1000)
-             snum="000"+snum;
-        else if (i<10000)
-             snum="00"+snum;
-        else if (i<100000)
-             snum="0"+snum;
+            if (i<10)
+                snum="00000"+snum;
+            else if (i<100)
+                snum="0000"+snum;
+            else if (i<1000)
+                snum="000"+snum;
+            else if (i<10000)
+                snum="00"+snum;
+            else if (i<100000)
+                snum="0"+snum;
 
 
-        QString imname(("/frame_" + snum + ".tiff").c_str() );
-        imname.prepend(mdir.absolutePath());
-        cout<<"fnamenew "<<imname.toStdString()<<endl;
-        writeTIFF(width, height,imname.toStdString(), compression);
+            QString imname(("/frame_" + snum + ".tiff").c_str() );
+            imname.prepend(mdir.absolutePath());
+            cout<<"fnamenew "<<imname.toStdString()<<endl;
+            writeTIFF(width, height,imname.toStdString(), compression);
 
-        QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
-        imname_jpg.prepend(mdir.absolutePath());
-        QString program = "convert";
-          QStringList arguments;
+            QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
+            imname_jpg.prepend(mdir.absolutePath());
+            QString program = "convert";
+            QStringList arguments;
             arguments <<"-quality"<<"100"<<imname<< imname_jpg;
-cout<<imname_jpg.toStdString()<<endl;
-          QProcess *myProcess = new QProcess();
-          myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
-          myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
+            cout<<imname_jpg.toStdString()<<endl;
+            QProcess *myProcess = new QProcess();
+            myProcess->setStandardOutputFile("/tmp/brimovie/stdout.txt");
+            myProcess->setStandardErrorFile("/tmp/brimovie/err.log");
 
             myProcess->start(program, arguments);
-          myProcess->waitForFinished(-1);
-          // myProcess->close();
-          cout<<"done convert "<<imname_jpg.toStdString()<<endl;
-           program.clear();
-           program.append("rm");
-           arguments.clear();
-           arguments<<imname;
-           myProcess->start(program, arguments);
-         myProcess->waitForFinished(-1);
+            myProcess->waitForFinished(-1);
+            // myProcess->close();
+            cout<<"done convert "<<imname_jpg.toStdString()<<endl;
+            program.clear();
+            program.append("rm");
+            arguments.clear();
+            arguments<<imname;
+            myProcess->start(program, arguments);
+            myProcess->waitForFinished(-1);
 
-         delete myProcess;
-          cout<<"done remove_file"<<endl;
+            delete myProcess;
+            cout<<"done remove_file"<<endl;
         }
     }
     progressD.setValue(nframes);
@@ -487,61 +478,61 @@ cout<<imname_jpg.toStdString()<<endl;
     if (write)
     {
         QProgressDialog progressD2("Merging Images into Movie...", "Abort Render", 0, 10, this);
-           progressD2.setWindowModality(Qt::WindowModal);
-    //create movie
-           if (QFile::exists(QString(filename.c_str())))
-               QFile::remove(QString(filename.c_str()));
+        progressD2.setWindowModality(Qt::WindowModal);
+        //create movie
+        if (QFile::exists(QString(filename.c_str())))
+            QFile::remove(QString(filename.c_str()));
 
-cout<<"Creating movie from Images..."<<endl;
-progressD2.setValue(1);
+        cout<<"Creating movie from Images..."<<endl;
+        progressD2.setValue(1);
 
-    QString program = "ffmpeg";
-      QStringList arguments;
-      QString stemp;
-      stemp.setNum(fps);
-      arguments<<"-i"<<"/tmp/brimovie/frame_%06d.jpg"<<"-qmin"<<"1"<<"-qmax"<<"1"<<"-r"<<stemp<<filename.c_str();
-    QProcess *myProcess = new QProcess();
-   myProcess->setStandardOutputFile("/tmp/brimovie/ffmpeg.txt");
-    myProcess->setStandardErrorFile("/tmp/brimovie/ffmpeg.log");
-    myProcess->start(program, arguments);
-     myProcess->waitForFinished(-1);
+        QString program = "ffmpeg";
+        QStringList arguments;
+        QString stemp;
+        stemp.setNum(fps);
+        arguments<<"-i"<<"/tmp/brimovie/frame_%06d.jpg"<<"-qmin"<<"1"<<"-qmax"<<"1"<<"-r"<<stemp<<filename.c_str();
+        QProcess *myProcess = new QProcess();
+        myProcess->setStandardOutputFile("/tmp/brimovie/ffmpeg.txt");
+        myProcess->setStandardErrorFile("/tmp/brimovie/ffmpeg.log");
+        myProcess->start(program, arguments);
+        myProcess->waitForFinished(-1);
 
-    cout<<"Images have been merged..."<<endl;
-    program.clear();
-    program.append("rm");
-    arguments.clear();
+        cout<<"Images have been merged..."<<endl;
+        program.clear();
+        program.append("rm");
+        arguments.clear();
 
-    for (unsigned int i = 0 ; i < nframes; ++i)
-    {
+        for (unsigned int i = 0 ; i < nframes; ++i)
+        {
 
-        stringstream ss;
-        ss<<i;
-        string snum;
-        ss>>snum;
+            stringstream ss;
+            ss<<i;
+            string snum;
+            ss>>snum;
 
-        if (i<10)
-            snum="00000"+snum;
-        else if (i<100)
-             snum="0000"+snum;
-        else if (i<1000)
-             snum="000"+snum;
-        else if (i<10000)
-             snum="00"+snum;
-        else if (i<100000)
-             snum="0"+snum;
+            if (i<10)
+                snum="00000"+snum;
+            else if (i<100)
+                snum="0000"+snum;
+            else if (i<1000)
+                snum="000"+snum;
+            else if (i<10000)
+                snum="00"+snum;
+            else if (i<100000)
+                snum="0"+snum;
 
-        QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
-        imname_jpg.prepend(mdir.absolutePath());
-        arguments<<imname_jpg;
+            QString imname_jpg(("/frame_" + snum + ".jpg").c_str() );
+            imname_jpg.prepend(mdir.absolutePath());
+            arguments<<imname_jpg;
 
+        }
+        myProcess->start(program, arguments);
+        myProcess->waitForFinished(-1);
+
+        delete myProcess;
+
+        progressD2.setValue(10);
     }
-    myProcess->start(program, arguments);
-     myProcess->waitForFinished(-1);
-
-    delete myProcess;
-
-    progressD2.setValue(10);
-}
     scene_props->setCameraParameters(eye_camera,center_camera,vup_camera);
     updateGL();
 
@@ -551,33 +542,33 @@ progressD2.setValue(1);
 int myOpenGLWidget::renderCapture( const string & filename  , const unsigned int & compression, const unsigned int & nviews )
 {
     cout<<"get render data "<<filename<<endl;
-  //  float* image = new float[width*height*3];
-   // TIFF* tif = TIFFOpen("foo.tif", "w");
+    //  float* image = new float[width*height*3];
+    // TIFF* tif = TIFFOpen("foo.tif", "w");
 
-   // glReadPixels(0,0,width,height,GL_RGB,GL_FLOAT, image);
+    // glReadPixels(0,0,width,height,GL_RGB,GL_FLOAT, image);
     //for (int i = 0 ; i < 10; ++i)
-      //  cout<<"image "<<image[i]<<endl;
-//COMPRESSION_NONE
-//        COMPRESSION_LZW
+    //  cout<<"image "<<image[i]<<endl;
+    //COMPRESSION_NONE
+    //        COMPRESSION_LZW
     int str_max=filename.size()-1;
     bool istif=false;
     bool istiff=false;
-     string fname_new=filename;
-     cout<<"filename base "<<filename.substr(str_max-3,4)<<endl;
-     //if dont check if string is long enough, it will crash when too short
-     if (str_max>=3)
-    if (! filename.compare(str_max-3,4,".tif"))
-    {
-        cout<<"file end with .tif"<<endl;
-        istif=true;
-    }
+    string fname_new=filename;
+    cout<<"filename base "<<filename.substr(str_max-3,4)<<endl;
+    //if dont check if string is long enough, it will crash when too short
+    if (str_max>=3)
+        if (! filename.compare(str_max-3,4,".tif"))
+        {
+            cout<<"file end with .tif"<<endl;
+            istif=true;
+        }
 
     if (str_max>=4)
-    if (! filename.compare(str_max-4,5,".tiff"))
-    {
-        cout<<"file end with .tiff"<<endl;
-        istiff=true;
-    }
+        if (! filename.compare(str_max-4,5,".tiff"))
+        {
+            cout<<"file end with .tiff"<<endl;
+            istiff=true;
+        }
     if (nviews == 1)
     {
         //add tif extension if none found
@@ -608,7 +599,7 @@ int myOpenGLWidget::renderCapture( const string & filename  , const unsigned int
             rotation(0,PI/2.0);
 
         }
-       // rotation(0,PI/2.0);
+        // rotation(0,PI/2.0);
 
     }else if ( nviews == 6 )
     {
@@ -629,40 +620,40 @@ int myOpenGLWidget::renderCapture( const string & filename  , const unsigned int
             rotation(0,PI/2.0);
 
         }
-       // rotation(0,PI/2.0);
- //-------NEXT STEP
+        // rotation(0,PI/2.0);
+        //-------NEXT STEP
         {
-        stringstream ss;
-        ss<<4;
-        string snum;
-        ss>>snum;
-        if (istif)
-            fname_new=filename.substr(0, str_max-3)+"-"+snum+".tif";
-        else if (istiff)
-            fname_new=filename.substr(0, str_max-4)+"-"+snum+".tiff";
-        else
-            fname_new = filename +"-"+snum+ ".tif";
+            stringstream ss;
+            ss<<4;
+            string snum;
+            ss>>snum;
+            if (istif)
+                fname_new=filename.substr(0, str_max-3)+"-"+snum+".tif";
+            else if (istiff)
+                fname_new=filename.substr(0, str_max-4)+"-"+snum+".tiff";
+            else
+                fname_new = filename +"-"+snum+ ".tif";
 
+            rotation(PI/2.0,0);
+            writeTIFF(width, height,fname_new, compression);
+        }
+        //-------NEXT STEP
+        {
+            stringstream ss;
+            ss<<5;
+            string snum;
+            ss>>snum;
+            if (istif)
+                fname_new=filename.substr(0, str_max-3)+"-"+snum+".tif";
+            else if (istiff)
+                fname_new=filename.substr(0, str_max-4)+"-"+snum+".tiff";
+            else
+                fname_new = filename +"-"+snum+ ".tif";
+
+            rotation(PI,0);
+            writeTIFF(width, height,fname_new, compression);
+        }
         rotation(PI/2.0,0);
-        writeTIFF(width, height,fname_new, compression);
-    }
-//-------NEXT STEP
-        {
-        stringstream ss;
-        ss<<5;
-        string snum;
-        ss>>snum;
-        if (istif)
-            fname_new=filename.substr(0, str_max-3)+"-"+snum+".tif";
-        else if (istiff)
-            fname_new=filename.substr(0, str_max-4)+"-"+snum+".tiff";
-        else
-            fname_new = filename +"-"+snum+ ".tif";
-
-        rotation(PI,0);
-        writeTIFF(width, height,fname_new, compression);
-    }
-          rotation(PI/2.0,0);
     }
 
 }
@@ -709,7 +700,7 @@ void  myOpenGLWidget::setShaders() {
     loc_a_lut = glGetUniformLocation(p_light_dir_map_scalars,"a_lut");
 
     loc_sc_lut = glGetUniformLocation(p_light_dir_map_scalars,"sc_lut");
-     loc_r_lut_last = glGetUniformLocation(p_light_dir_map_scalars,"r_lut_last");
+    loc_r_lut_last = glGetUniformLocation(p_light_dir_map_scalars,"r_lut_last");
     loc_g_lut_last = glGetUniformLocation(p_light_dir_map_scalars,"g_lut_last");
     loc_b_lut_last = glGetUniformLocation(p_light_dir_map_scalars,"b_lut_last");
     loc_a_lut_last = glGetUniformLocation(p_light_dir_map_scalars,"a_lut_last");
@@ -778,74 +769,8 @@ void  myOpenGLWidget::setShaders() {
     graph_->setColourTableUniformLocations(loc_r_lut,loc_g_lut,loc_b_lut,loc_a_lut, loc_sc_lut,loc_r_lut_last,loc_g_lut_last,loc_b_lut_last,loc_a_lut_last,loc_sc_lut_last,loc_low_clamp);
 
 
-  //  surfaces->setVertexAttribLocs(0,1, 2);
-  //**********************Directional Light Shader for Colour Bar********************//
-/*
-    v_cbar_map_scalars = glCreateShader(GL_VERTEX_SHADER);
-    f_cbar_map_scalars = glCreateShader(GL_FRAGMENT_SHADER);
-    //prt pixel shaders
-    vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/colour_bar_map_scalars.vert").toAscii());
-    fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/colour_bar_map_scalars.frag").toAscii());
+    //**********************Directional Light Shader for Colour Bar********************//
 
-    const char * vv_cbar = vs;
-    const char * ff_cbar = fs;
-
-    glShaderSource(v_cbar_map_scalars, 1, &vv_cbar,NULL);
-    glShaderSource(f_cbar_map_scalars, 1, &ff_cbar,NULL);
-
-    glCompileShader(v_cbar_map_scalars);
-    glCompileShader(f_cbar_map_scalars);
-
-    p_cbar_map_scalars = glCreateProgram();
-
-    glAttachShader(p_cbar_map_scalars,v_cbar_map_scalars);
-    glAttachShader(p_cbar_map_scalars,f_cbar_map_scalars);
-
-    glBindAttribLocation(p_cbar_map_scalars,0,"InVertex");
-    glBindAttribLocation(p_cbar_map_scalars,1,"InNormal");
-    glBindAttribLocation(p_cbar_map_scalars,2,"InScalar");
-
-
-    glLinkProgram(p_cbar_map_scalars);
-    glUseProgram(p_cbar_map_scalars);
-
-loc_r_lut = glGetUniformLocation(p_cbar_map_scalars,"r_lut");
-    loc_g_lut = glGetUniformLocation(p_cbar_map_scalars,"g_lut");
-    loc_b_lut = glGetUniformLocation(p_cbar_map_scalars,"b_lut");
-    loc_sc_lut = glGetUniformLocation(p_cbar_map_scalars,"sc_lut");
-
-    r_lut[0]=1.0;
-    r_lut[1]=1.0;
-    r_lut[2]=0.0;
-    r_lut[3]=0.0;
-
-    g_lut[0]=0.0;
-    g_lut[1]=1.0;
-    g_lut[2]=1.0;
-    g_lut[3]=0.0;
-
-    b_lut[0]=0.0;
-    b_lut[1]=0.0;
-    b_lut[2]=1.0;
-    b_lut[3]=1.0;
-
-    sc_lut[0]=0.0;
-    sc_lut[1]=1.0/3;
-    sc_lut[2]=2.0/3;
-    sc_lut[3]=1.0;
-
-    glUniform4fv(loc_r_lut,1,r_lut);
-    glUniform4fv(loc_g_lut,1,g_lut);
-  glUniform4fv(loc_b_lut,1,b_lut);
-  glUniform4fv(loc_sc_lut,1,sc_lut);
-
-  //  InVertex_loc = glGetAttribLocation(p_light_dir_map_scalars, "InVertex");
-  //  InNormal_loc = glGetAttribLocation(p_light_dir_map_scalars, "InNormal");
-   // InScalar_loc = glGetAttribLocation(p_light_dir_map_scalars, "InScalar");
-
-    //surfaces->setVertexAttribLocs(0,1, 2);
-    surfaces->setColourBarUniformLocations(loc_r_lut,loc_g_lut,loc_b_lut,loc_sc_lut);
-*/
     //-------------------------shader for constant colour---------------//
 
     v_light_dir = glCreateShader(GL_VERTEX_SHADER);
@@ -880,7 +805,7 @@ loc_r_lut = glGetUniformLocation(p_cbar_map_scalars,"r_lut");
     vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture.vert").toUtf8().data());
     fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture.frag").toUtf8().data());
 
-   // vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_with_vertex.vert").toAscii());
+    // vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_with_vertex.vert").toAscii());
     //fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_with_vertex.frag").toAscii());
 
     v_im_texture = glCreateShader(GL_VERTEX_SHADER);
@@ -980,30 +905,30 @@ void myOpenGLWidget::rotation(const float & theta, const float & phi )
 
     mouseInMotion=true;
 
-  float phi_step=0.02,phi_rem=0;
-  float theta_step=0.02,theta_rem=0;
+    float phi_step=0.02,phi_rem=0;
+    float theta_step=0.02,theta_rem=0;
 
-  int nsteps=0;
-//  int nsteps_phi=0;
- // int nsteps_theta=0;
+    int nsteps=0;
+    //  int nsteps_phi=0;
+    // int nsteps_theta=0;
     if (phi> theta)
-  {
-      nsteps = static_cast<int>(phi/abs(phi_step));
-      theta_step = theta/nsteps;
-      phi_rem = phi - nsteps*abs(phi_step);
+    {
+        nsteps = static_cast<int>(phi/abs(phi_step));
+        theta_step = theta/nsteps;
+        phi_rem = phi - nsteps*abs(phi_step);
         theta_rem = 0 ;
-  } else{
-       nsteps = static_cast<int>(theta/abs(theta_step));
+    } else{
+        nsteps = static_cast<int>(theta/abs(theta_step));
         phi_step = phi/nsteps;
 
         theta_rem = theta - nsteps*abs(theta_step);
         phi_rem = 0;
-   }
+    }
 
     //nsteps_theta = static_cast<int>(theta/abs(theta_step));
 
 
-/*  if (abs(dif.x)>abs(dif.y))
+    /*  if (abs(dif.x)>abs(dif.y))
   {
         if (dif.x<0)
             phi=-0.01;
@@ -1027,8 +952,8 @@ void myOpenGLWidget::rotation(const float & theta, const float & phi )
     for (int i = 0 ; i< nsteps; i++)
     {
         // mag=1.0;
-     //   //cout<<"step "<<i<<"/"<<nsteps<<endl;
-      //  //cout<<"thetaphi "<<theta<<" "<<phi<<endl;
+        //   //cout<<"step "<<i<<"/"<<nsteps<<endl;
+        //  //cout<<"thetaphi "<<theta<<" "<<phi<<endl;
         scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
         dir_proj = center_camera - eye_camera;
         mag = norm(dir_proj);
@@ -1101,7 +1026,7 @@ void myOpenGLWidget::rotation(const float & theta, const float & phi )
 
 void myOpenGLWidget::translateAndRotate(const float & tx, const float & ty, const float & tz, const float & theta, const float & phi )
 {
-//no steps
+    //no steps
     briview::float3 eye_camera,center_camera,vup_camera,viewSide;
 
     scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
@@ -1127,7 +1052,7 @@ void myOpenGLWidget::translateAndRotate(const float & tx, const float & ty, cons
 
 
 
-cout<<"thetaphi "<<theta<<" "<<phi<<endl;
+    cout<<"thetaphi "<<theta<<" "<<phi<<endl;
     //------------------Elevation--------------------//
     float x = -mag*cosf(theta);
     float y = mag*sinf(theta);
@@ -1157,23 +1082,18 @@ cout<<"thetaphi "<<theta<<" "<<phi<<endl;
 
 }
 
-void myOpenGLWidget::mouseMoveEvent ( QMouseEvent * event )
+void myOpenGLWidget::cameraMove ( float2  cur_loc )
 {
-    if ((!mouseInMotion)|| (mouseMode!=5))
-    {
-        //mouseInMotion=true;
-    //    //cout<<"mouse in motion count "<<mouseInMotionCount<<endl;
 
-    float2 dif;
     briview::float3 eye_camera,center_camera,vup_camera,viewSide;
+    float2 dif;
 
-    dif.x=(event->x()-prevLoc.x);
-    dif.y=-(event->y()-prevLoc.y);
-
+    dif.x=(cur_loc.x-prevLoc.x);
+    dif.y=-(cur_loc.y-prevLoc.y);
     if ((mouseMode!=5) || (mouseInMotionCount==0))
     {
-        prevLoc.x=event->x();
-        prevLoc.y=event->y();
+        prevLoc.x=cur_loc.x;
+        prevLoc.y=cur_loc.y;
     }
     mouseInMotionCount++;
 
@@ -1181,152 +1101,67 @@ void myOpenGLWidget::mouseMoveEvent ( QMouseEvent * event )
 
     if (l!=0)
     {
-    dif.x*=mouseSensitivity/l;
-    dif.y*=mouseSensitivity/l;
+        dif.x*=mouseSensitivity/l;
+        dif.y*=mouseSensitivity/l;
 
 
 
-    scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
-    briview::float3 dir_proj = center_camera - eye_camera;
-    float mag = norm(dir_proj);
-    viewSide = crossProd(dir_proj,vup_camera);
-    norm(viewSide);
-
-    if (mouseMode==0)
-    {
-        //translation
-        briview::float3 v_tr = viewSide * dif.x;
-        briview::float3 dy=vup_camera* dif.y;
-        v_tr = v_tr + dy;
-        eye_camera=eye_camera+v_tr;
-        center_camera=center_camera+v_tr;
-    }else if (mouseMode==1)
-    {//zoom
-        //cout<<"dify "<<dif.y<<" "<<mouseSensitivity<<" "<<mag<<endl;
-        if ((dif.y<0)&&(mouseSensitivity<mag))
-        {
-            eye_camera.x+=dir_proj.x*mouseSensitivity;
-            eye_camera.y+=dir_proj.y*mouseSensitivity;
-            eye_camera.z+=dir_proj.z*mouseSensitivity;
-
-        }else if (dif.y>0)
-        {
-            eye_camera.x-=dir_proj.x*mouseSensitivity;
-            eye_camera.y-=dir_proj.y*mouseSensitivity;
-            eye_camera.z-=dir_proj.z*mouseSensitivity;
-        }
-
-    }else if (mouseMode==2)
-    {
-        //rotation
-
-        float theta=0.01*mouseSensitivity;
-
-        if (event->x()<width/2.0f){
-            if (dif.y>0)
-                theta*=-1;
-        }else{
-            if (dif.y<0)
-                theta*=-1;
-        }
-
-        float y=cosf(theta);
-        float x=sinf(theta);
-        briview::float3 xp=(viewSide*x);
-        briview::float3 yp=(vup_camera*y);
-        vup_camera = xp+yp ;
-
-
-    }else if (mouseMode==3)
-    {
-//rotation
-           float theta=dif.y*0.001*mouseSensitivity;
-           float phi=dif.x*0.001*mouseSensitivity;
-
-        //------------------Elevation--------------------//
-        float x = -mag*cosf(theta);
-        float y = mag*sinf(theta);
-        briview::float3 xp = (dir_proj*x);
-        briview::float3 yp = (vup_camera*y);
-        eye_camera = center_camera + xp;
-        eye_camera = eye_camera +yp;
-
-        //------------------Azimuth--------------------//
-        y =  mag*sinf(phi);
-        yp = (viewSide*y);
-
-        eye_camera = eye_camera + yp;
-
-        //------------------------------------------------//
-
-        dir_proj=center_camera-eye_camera;
-        viewSide=crossProd(dir_proj, vup_camera);
+        scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
+        briview::float3 dir_proj = center_camera - eye_camera;
+        float mag = norm(dir_proj);
+        viewSide = crossProd(dir_proj,vup_camera);
         norm(viewSide);
-        vup_camera=crossProd(viewSide,dir_proj);
-        norm(vup_camera);
 
-    }else if (mouseMode==4)
-    {
-//rotation
-        float theta=dif.y*0.001*mouseSensitivity;
-        float phi=dif.x*0.001*mouseSensitivity;
-        //------------------Pitch--------------------//
-        float x = mag*cosf(theta);
-        float y = -mag*sinf(theta);
-        briview::float3 xp = (dir_proj*x);
-        briview::float3 yp = (vup_camera*y);
-        center_camera = eye_camera + xp;
-        center_camera = center_camera +yp;
-        //------------------Azimuth--------------------//
-        y =  -mag*sinf(phi);
-        yp = (viewSide*y);
-
-        center_camera = center_camera + yp;
-
-        //------------------------------------------------//
-
-        dir_proj=center_camera-eye_camera;
-        viewSide=crossProd(dir_proj, vup_camera);
-        norm(viewSide);
-        vup_camera=crossProd(viewSide,dir_proj);
-        norm(vup_camera);
-    }else if ( (mouseMode==5) && (mouseInMotionCount == 10) )
-    {
-        mouseInMotion=true;
-
-      float phi=0,phi_rem=0;
-      float theta=0,theta_rem=0;
-      int nsteps=0;
-      if (abs(dif.x)>abs(dif.y))
-      {
-            if (dif.x<0)
-                phi=-0.01;
-            else
-                phi=0.01;
-            nsteps = static_cast<int>(PI/2.0/abs(phi));
-            phi_rem = PI/2.0 - nsteps*abs(phi);
-            if (dif.x<0) phi_rem*=-1;
-
-        }else{
-            if (dif.y<0)
-                theta=-0.01;
-            else
-                theta=0.01;
-            nsteps = static_cast<int>(PI/2.0/abs(theta));
-            theta_rem = PI/2.0 - nsteps*abs(theta);
-            if (dif.y<0) theta_rem*=-1;
-
-        }
-        for (int i = 0 ; i< nsteps; i++)
+        if (mouseMode==0)
         {
-            // mag=1.0;
-         //   //cout<<"step "<<i<<"/"<<nsteps<<endl;
-          //  //cout<<"thetaphi "<<theta<<" "<<phi<<endl;
-            scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
-            dir_proj = center_camera - eye_camera;
-            mag = norm(dir_proj);
-            viewSide = crossProd(dir_proj,vup_camera);
-            norm(viewSide);
+            //translation
+            briview::float3 v_tr = viewSide * dif.x;
+            briview::float3 dy=vup_camera* dif.y;
+            v_tr = v_tr + dy;
+            eye_camera=eye_camera+v_tr;
+            center_camera=center_camera+v_tr;
+        }else if (mouseMode==1)
+        {//zoom
+            //cout<<"dify "<<dif.y<<" "<<mouseSensitivity<<" "<<mag<<endl;
+            if ((dif.y<0)&&(mouseSensitivity<mag))
+            {
+                eye_camera.x+=dir_proj.x*mouseSensitivity;
+                eye_camera.y+=dir_proj.y*mouseSensitivity;
+                eye_camera.z+=dir_proj.z*mouseSensitivity;
+
+            }else if (dif.y>0)
+            {
+                eye_camera.x-=dir_proj.x*mouseSensitivity;
+                eye_camera.y-=dir_proj.y*mouseSensitivity;
+                eye_camera.z-=dir_proj.z*mouseSensitivity;
+            }
+
+        }else if (mouseMode==4)
+        {
+            //rotation
+
+            float theta=0.01*mouseSensitivity;
+
+            if (cur_loc.x<width/2.0f){
+                if (dif.y>0)
+                    theta*=-1;
+            }else{
+                if (dif.y<0)
+                    theta*=-1;
+            }
+
+            float y=cosf(theta);
+            float x=sinf(theta);
+            briview::float3 xp=(viewSide*x);
+            briview::float3 yp=(vup_camera*y);
+            vup_camera = xp+yp ;
+
+
+        }else if (mouseMode==2)
+        {
+            //rotation
+            float theta=dif.y*0.001*mouseSensitivity;
+            float phi=dif.x*0.001*mouseSensitivity;
 
             //------------------Elevation--------------------//
             float x = -mag*cosf(theta);
@@ -1350,50 +1185,174 @@ void myOpenGLWidget::mouseMoveEvent ( QMouseEvent * event )
             vup_camera=crossProd(viewSide,dir_proj);
             norm(vup_camera);
 
+        }else if (mouseMode==3)
+        {
+            //rotation
+            float theta=dif.y*0.001*mouseSensitivity;
+            float phi=dif.x*0.001*mouseSensitivity;
+            //------------------Pitch--------------------//
+            float x = mag*cosf(theta);
+            float y = -mag*sinf(theta);
+            briview::float3 xp = (dir_proj*x);
+            briview::float3 yp = (vup_camera*y);
+            center_camera = eye_camera + xp;
+            center_camera = center_camera +yp;
+            //------------------Azimuth--------------------//
+            y =  -mag*sinf(phi);
+            yp = (viewSide*y);
 
-            scene_props->setCameraParameters(eye_camera,center_camera,vup_camera);
+            center_camera = center_camera + yp;
 
-            updateGL();
-            // break;
+            //------------------------------------------------//
+
+            dir_proj=center_camera-eye_camera;
+            viewSide=crossProd(dir_proj, vup_camera);
+            norm(viewSide);
+            vup_camera=crossProd(viewSide,dir_proj);
+            norm(vup_camera);
+        }else if ( (mouseMode==5) && (mouseInMotionCount == 10) )
+        {
+            mouseInMotion=true;
+
+            float phi=0,phi_rem=0;
+            float theta=0,theta_rem=0;
+            int nsteps=0;
+            if (abs(dif.x)>abs(dif.y))
+            {
+                if (dif.x<0)
+                    phi=-0.01;
+                else
+                    phi=0.01;
+                nsteps = static_cast<int>(PI/2.0/abs(phi));
+                phi_rem = PI/2.0 - nsteps*abs(phi);
+                if (dif.x<0) phi_rem*=-1;
+
+            }else{
+                if (dif.y<0)
+                    theta=-0.01;
+                else
+                    theta=0.01;
+                nsteps = static_cast<int>(PI/2.0/abs(theta));
+                theta_rem = PI/2.0 - nsteps*abs(theta);
+                if (dif.y<0) theta_rem*=-1;
+
+            }
+            for (int i = 0 ; i< nsteps; i++)
+            {
+                // mag=1.0;
+                //   //cout<<"step "<<i<<"/"<<nsteps<<endl;
+                //  //cout<<"thetaphi "<<theta<<" "<<phi<<endl;
+                scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
+                dir_proj = center_camera - eye_camera;
+                mag = norm(dir_proj);
+                viewSide = crossProd(dir_proj,vup_camera);
+                norm(viewSide);
+
+                //------------------Elevation--------------------//
+                float x = -mag*cosf(theta);
+                float y = mag*sinf(theta);
+                briview::float3 xp = (dir_proj*x);
+                briview::float3 yp = (vup_camera*y);
+                eye_camera = center_camera + xp;
+                eye_camera = eye_camera +yp;
+
+                //------------------Azimuth--------------------//
+                y =  mag*sinf(phi);
+                yp = (viewSide*y);
+
+                eye_camera = eye_camera + yp;
+
+                //------------------------------------------------//
+
+                dir_proj=center_camera-eye_camera;
+                viewSide=crossProd(dir_proj, vup_camera);
+                norm(viewSide);
+                vup_camera=crossProd(viewSide,dir_proj);
+                norm(vup_camera);
+
+
+                scene_props->setCameraParameters(eye_camera,center_camera,vup_camera);
+
+                updateGL();
+                // break;
+            }
+
+            scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
+            dir_proj = center_camera - eye_camera;
+            mag = norm(dir_proj);
+            viewSide = crossProd(dir_proj,vup_camera);
+            norm(viewSide);
+
+            //------------------Elevation--------------------//
+            float x = -mag*cosf(theta_rem);
+            float y = mag*sinf(theta_rem);
+            briview::float3 xp = (dir_proj*x);
+            briview::float3 yp = (vup_camera*y);
+            eye_camera = center_camera + xp;
+            eye_camera = eye_camera +yp;
+
+            //------------------Azimuth--------------------//
+            y =  mag*sinf(phi_rem);
+            yp = (viewSide*y);
+
+            eye_camera = eye_camera + yp;
+
+            //------------------------------------------------//
+
+            dir_proj=center_camera-eye_camera;
+            viewSide=crossProd(dir_proj, vup_camera);
+            norm(viewSide);
+            vup_camera=crossProd(viewSide,dir_proj);
+            norm(vup_camera);
+
         }
+        scene_props->setCameraParameters(eye_camera,center_camera,vup_camera);
 
-        scene_props->getCameraParameters(eye_camera,center_camera,vup_camera);
-        dir_proj = center_camera - eye_camera;
-        mag = norm(dir_proj);
-        viewSide = crossProd(dir_proj,vup_camera);
-        norm(viewSide);
+        updateGL();
 
-        //------------------Elevation--------------------//
-        float x = -mag*cosf(theta_rem);
-        float y = mag*sinf(theta_rem);
-        briview::float3 xp = (dir_proj*x);
-        briview::float3 yp = (vup_camera*y);
-        eye_camera = center_camera + xp;
-        eye_camera = eye_camera +yp;
-
-        //------------------Azimuth--------------------//
-        y =  mag*sinf(phi_rem);
-        yp = (viewSide*y);
-
-        eye_camera = eye_camera + yp;
-
-        //------------------------------------------------//
-
-        dir_proj=center_camera-eye_camera;
-        viewSide=crossProd(dir_proj, vup_camera);
-        norm(viewSide);
-        vup_camera=crossProd(viewSide,dir_proj);
-        norm(vup_camera);
-
-  }
-    scene_props->setCameraParameters(eye_camera,center_camera,vup_camera);
-
-    updateGL();
+    }
 }
-  //  mouseInMotion=false;
+
+void myOpenGLWidget::mouseMoveEvent ( QMouseEvent * event )
+{
+    if ((!mouseInMotion)|| (mouseMode!=5))
+    {
+        //mouseInMotion=true;
+        //    //cout<<"mouse in motion count "<<mouseInMotionCount<<endl;
+
+        //    float2 dif;
+        //    briview::float3 eye_camera,center_camera,vup_camera,viewSide;
+        float2 cur_loc(event->x(),event->y());
+        //    dif.x=(cur_loc.x-prevLoc.x);
+        //    dif.y=-(event->y()-prevLoc.y);
+        cameraMove(cur_loc);
+    }
+    //  mouseInMotion=false;
+
 
 }
+void myOpenGLWidget::camera_up()
+{
+    float2 cur_loc(prevLoc.x,prevLoc.y -1 );
+    cameraMove(cur_loc);
 }
+void myOpenGLWidget::camera_down()
+{
+    float2 cur_loc(prevLoc.x,prevLoc.y +1 );
+    cameraMove(cur_loc);
+}
+void myOpenGLWidget::camera_left()
+{
+    float2 cur_loc(prevLoc.x-1,prevLoc.y );
+    cameraMove(cur_loc);
+}
+void myOpenGLWidget::camera_right()
+{
+    float2 cur_loc(prevLoc.x+1,prevLoc.y  );
+    cameraMove(cur_loc);
+}
+
+
 
 void myOpenGLWidget::setSceneProperties(scene_properties** scene)
 {
@@ -1418,7 +1377,7 @@ void  myOpenGLWidget::setCameraPositionToSurface(const int & index)
 
 void myOpenGLWidget::mouseReleaseEvent ( QMouseEvent * event )
 {
-  //  //cout<<"mouse release "<<hasMouseTracking()<<endl;
+    //  //cout<<"mouse release "<<hasMouseTracking()<<endl;
     mouseInMotion=false;
     mouseInMotionCount=0;
 }
@@ -1426,9 +1385,9 @@ void myOpenGLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 void myOpenGLWidget::mousePressEvent ( QMouseEvent * event )
 {
-  //  //cout<<"mouse press "<<hasMouseTracking()<<endl;
-  //  prevLoc.x=event->x();
-  //  prevLoc.y=event->y();
+    //  //cout<<"mouse press "<<hasMouseTracking()<<endl;
+    //  prevLoc.x=event->x();
+    //  prevLoc.y=event->y();
 
 }
 
@@ -1573,7 +1532,7 @@ void myOpenGLWidget::initializeGL()
         exit (EXIT_FAILURE);
     }
 #else
-//cout<<"in the else "<<endl;
+    //cout<<"in the else "<<endl;
     glGenFramebuffers(1,&fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -1609,8 +1568,8 @@ void myOpenGLWidget::initializeGL()
     glClearDepth(1.0f);
     glDepthMask(GL_TRUE);
 
- //   glEnable(GL_CULL_FACE);
-  //  glEnable(GL_NORMALIZE);
+    //   glEnable(GL_CULL_FACE);
+    //  glEnable(GL_NORMALIZE);
     glEnable(GL_BLEND);
 
 
@@ -1632,9 +1591,9 @@ void myOpenGLWidget::initializeGL()
 
     surfaces->setGLSLPrograms(progs);
     //surfaces->setGLSLProgramsColourBar(progs);
-//    vector<GLuint> progs_graph;
-//    progs_graph.push_back(p_light_dir_map_scalars);//nodes
-//    progs_graph.push_back(p_light_dir_map_scalars);//links
+    //    vector<GLuint> progs_graph;
+    //    progs_graph.push_back(p_light_dir_map_scalars);//nodes
+    //    progs_graph.push_back(p_light_dir_map_scalars);//links
     graph_->setGLSLPrograms(progs);
     images->setGLSLProgram(p_im_texture);
     images->setGLSLProgramCbar(p_light_dir_map_scalars);
@@ -1667,17 +1626,17 @@ void myOpenGLWidget::resizeGL(int w, int h)
 
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 #else
-	glBindRenderbuffer(GL_RENDERBUFFER,rbo[Depth]);
+    glBindRenderbuffer(GL_RENDERBUFFER,rbo[Depth]);
     glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT,w,h);
-	
+
     glBindRenderbuffer(GL_RENDERBUFFER,rbo[Color]);
     glRenderbufferStorage(GL_RENDERBUFFER,GL_RGBA,w,h);
-	
+
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	
+
 #endif
-	
-	
+
+
     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
     scene_props->setWindowSize(w,h);
     scene_props->setAspectRatio();
@@ -1686,7 +1645,7 @@ void myOpenGLWidget::resizeGL(int w, int h)
 #ifdef GL_GLEXT_PROTOTYPES 
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 #else
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #endif
     cout<<"done iniatlize GL"<<endl;
@@ -1700,7 +1659,7 @@ void myOpenGLWidget::paintGL()
 #ifdef GL_GLEXT_PROTOTYPES 
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo);
 #else
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
 #endif
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT );
@@ -1717,22 +1676,22 @@ void myOpenGLWidget::paintGL()
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-     images->renderSlices();
+    images->renderSlices();
 
-   // glUseProgram(p_light_dir_map_scalars);
+    // glUseProgram(p_light_dir_map_scalars);
     //images->renderColourBar();
-//cout<<"p_light_dir "<<p_light_dir_map_scalars<<endl;
-   // glDisable(GL_DEPTH_TEST);
+    //cout<<"p_light_dir "<<p_light_dir_map_scalars<<endl;
+    // glDisable(GL_DEPTH_TEST);
 
     //glUseProgram(p_light_dir_map_scalars);
-images->renderColourBar();
+    images->renderColourBar();
     //render command handles the progam setting
 
     surfaces->setEyeCentre(scene_props->getCameraEye(), scene_props->getCameraCenter());
 
-//  HERE  surfaces->renderOpaqueSurfaces();
+    //  HERE  surfaces->renderOpaqueSurfaces();
     surfaces->renderOpaqueSurfaces();
-cout<<"render surfa es"<<endl;
+    cout<<"render surfa es"<<endl;
     surfaces->renderOpaqueGlyphs();
     glUseProgram(p_light_dir_map_scalars);
     cout<<"render colour bar"<<endl;
@@ -1748,9 +1707,9 @@ cout<<"render surfa es"<<endl;
 
     surfaces->renderTranslucentSurfaces();
     surfaces->renderTranslucentGlyphs();
-cout<<"render graph"<<endl;
+    cout<<"render graph"<<endl;
     if (graph_->doRender())
-       graph_->render();
+        graph_->render();
     cout<<"done render graph"<<endl;
 
 
@@ -1762,10 +1721,10 @@ cout<<"render graph"<<endl;
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
     glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 #else
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	
+
 #endif
 
 

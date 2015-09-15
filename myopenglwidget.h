@@ -46,6 +46,11 @@ public:
     int renderCapture( const std::string & filename  ,const bool & write, const unsigned int & compression, const unsigned int & fps,const float & duration, const float & h_rot_range,const float & v_rot_range, const float & tx, const float & ty, const float &tz);
 
     int renderCapture( const std::string & filename , const unsigned int & compression, const unsigned int & nviews );
+public slots:
+    void camera_up();
+    void camera_down();
+    void camera_left();
+    void camera_right();
 
 signals:
     void changeCamera();
@@ -61,6 +66,7 @@ protected:
 
     void mousePressEvent( QMouseEvent * event );
     void mouseMoveEvent( QMouseEvent * event );
+    void cameraMove( fslsurface_name::float2 cur_loc );
     void mouseReleaseEvent ( QMouseEvent * event );
     void initializeGL();
     void resizeGL(int,int);

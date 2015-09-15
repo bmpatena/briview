@@ -112,6 +112,10 @@ graphContainer_->setVisible(0);
     connect(scene, SIGNAL(sig_changedMouseSensitivity(int)),this, SLOT(setMouseSensitivity(int)));
     connect(scene, SIGNAL(sig_changedMouseMode(int)),this, SLOT(setMouseMode(int)));
     connect(scene,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+    connect(scene,SIGNAL(sig_but_up()),ui->openGLwidget,SLOT(camera_up()));
+    connect(scene,SIGNAL(sig_but_down()),ui->openGLwidget,SLOT(camera_down()));
+    connect(scene,SIGNAL(sig_but_left()),ui->openGLwidget,SLOT(camera_left()));
+    connect(scene,SIGNAL(sig_but_right()),ui->openGLwidget,SLOT(camera_right()));
 
     connect(im_vid_widget, SIGNAL(sig_takeSnapShot()),this,SLOT(takeSnapShot()));
     connect(im_vid_widget, SIGNAL(sig_mov(bool)),this,SLOT(createMovie(bool)));

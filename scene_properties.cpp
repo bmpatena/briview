@@ -16,14 +16,20 @@ namespace briview{
         ui->setupUi(this);
         //Mouse interactions
         connect(ui->sensitivity_slider,SIGNAL(valueChanged(int)),this,SIGNAL(sig_changedMouseSensitivity(int)));
-        connect(ui->tx_mode,SIGNAL(released()),this,SLOT(emitMouseMode()));
-        connect(ui->scale_mode,SIGNAL(released()),this,SLOT(emitMouseMode()));
-        connect(ui->rot_mode_roll,SIGNAL(released()),this,SLOT(emitMouseMode()));
-        connect(ui->rot_mode_azi_ele,SIGNAL(released()),this,SLOT(emitMouseMode()));
-        connect(ui->rot_mode_pit_yaw,SIGNAL(released()),this,SLOT(emitMouseMode()));
-        connect(ui->rot_ortho,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->tx_mode,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->scale_mode,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->rot_mode_roll,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->rot_mode_azi_ele,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->rot_mode_pit_yaw,SIGNAL(released()),this,SLOT(emitMouseMode()));
+//        connect(ui->rot_ortho,SIGNAL(released()),this,SLOT(emitMouseMode()));
+connect(ui->cbox_motion_mode,SIGNAL(currentIndexChanged(int)), this, SIGNAL(sig_changedMouseMode(int)));
+connect(ui->but_up,SIGNAL(pressed()), this, SIGNAL(sig_but_up()));
+connect(ui->but_down,SIGNAL(pressed()), this, SIGNAL(sig_but_down()));
+connect(ui->but_left,SIGNAL(pressed()), this, SIGNAL(sig_but_left()));
+connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
 
-   //     connect(ui->next_page,SIGNAL(released()),this,SLOT(nextPage()));
+
+//     connect(ui->next_page,SIGNAL(released()),this,SLOT(nextPage()));
      //   connect(ui->prev_page,SIGNAL(released()),this,SLOT(prevPage()));
 
         connect( ui->gluLookAt_Set,SIGNAL(pressed()),this,SLOT(setCameraParameters()));
@@ -349,22 +355,23 @@ namespace briview{
 
 
     //*****************************MOUSE***********************************//
-            void scene_properties::emitMouseMode()
-    {
-        if (ui->tx_mode->isChecked())
-            emit sig_changedMouseMode(0);
-        else if (ui->scale_mode->isChecked())
-            emit sig_changedMouseMode(1);
-        else if (ui->rot_mode_roll->isChecked())
-            emit sig_changedMouseMode(2);
-        else if (ui->rot_mode_azi_ele->isChecked())
-            emit sig_changedMouseMode(3);
-        else if (ui->rot_mode_pit_yaw->isChecked())
-            emit sig_changedMouseMode(4);
-        else if (ui->rot_ortho->isChecked())
-            emit sig_changedMouseMode(5);
+//            void scene_properties::emitMouseMode(int index)
+//    {
+//        if (ui->tx_mode->isChecked())
+//            emit sig_changedMouseMode(0);
+//        else if (ui->scale_mode->isChecked())
+//            emit sig_changedMouseMode(1);
+//        else if (ui->rot_mode_roll->isChecked())
+//            emit sig_changedMouseMode(2);
+//        else if (ui->rot_mode_azi_ele->isChecked())
+//            emit sig_changedMouseMode(3);
+//        else if (ui->rot_mode_pit_yaw->isChecked())
+//            emit sig_changedMouseMode(4);
+//        else if (ui->rot_ortho->isChecked())
+//            emit sig_changedMouseMode(5);
 
-    }
+
+//    }
 
     //*****************************END MOUSE***********************************//
 
