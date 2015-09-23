@@ -31,4 +31,5 @@ Images are displayed using orthogonal volumes. Each orthogonal slice can be turn
  
 * Add shader selector and custom shaders
 * glShadeModelFlat
+* *toggle traingle sorting
 =======
