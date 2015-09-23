@@ -27,4 +27,8 @@ The "File" menu in the top left provides options for loading and saving surfaces
 ##Navigating Image Volumes
 Images are displayed using orthogonal volumes. Each orthogonal slice can be turn on/off. If viewing multiple images, it will uses the same slice and blend the images. How it is blended can be customizing. For example, one can have the image averaged.  
  
+##To DO 
+ 
+* Add shader selector and custom shaders
+ 
 =======
