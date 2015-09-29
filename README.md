@@ -10,6 +10,9 @@ Some key features include:
 - Orthoview screen capture as well as a flexible video capture facilities.
 - Load and Saving of scenens (partially implemented).
 
+#Requirements
+
+* libtiff
 
 #Usage
 
