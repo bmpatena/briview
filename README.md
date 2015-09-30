@@ -36,5 +36,5 @@ Images are displayed using orthogonal volumes. Each orthogonal slice can be turn
 * Add shader selector and custom shaders, online compile
 * glShadeModelFlat
 * *toggle traingle sorting
-* synchronize scalar sleectiomn
+* synchronize scalar sleectiomn, load proper scaklar selection when toggling surface, have embedde3d selected by default
 =======
