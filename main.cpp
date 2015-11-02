@@ -39,6 +39,11 @@ int main(int argc, char *argv[])
             loadIm=false;
             w.setCameraPositionToSurface(0);
 
+        }else if (!strcmp(argv[i],"-s") )
+        {
+            i++;
+            w.readSceneFromFile(string(argv[i]));
+
         }else if ( loadIm )
         {
             w.addImageToContainerSlicer(argv[i]);

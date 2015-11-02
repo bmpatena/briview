@@ -27,6 +27,10 @@ namespace briview{
 
         void get_gluPersp_params(fslsurface_name::float4 & gluPersp_params);
         void set_gluPersp_params(const fslsurface_name::float4 & gluPersp_params);
+
+
+        void set_bgcolor_ui(const fslsurface_name::float4 & bg_color_in );
+
       //  void updatePageText();
 
         briview::float3 getCameraCenter() { return center; }
@@ -36,6 +40,9 @@ namespace briview{
         void setCameraEye(const briview::float3 & eye_in);
         void setWindowSize(const int & w, const int & h);
         void setProjectionProperties();
+
+//        void setProjectionMode( const int & proj_mode_in ) { proj_mode = static_cast<PROJECTION_METHOD>(proj_mode_in);  }
+
 
     public slots:
         //Common
@@ -95,6 +102,8 @@ namespace briview{
     protected:
         void changeEvent(QEvent *e);
         void set_GlobalLightAmbientText();
+        void set_BgColor_Text();
+
         void set_LightAmbientText( const int & index );
         void set_LightDiffuseText( const int & index );
         void set_LightSpecularText( const int & index );

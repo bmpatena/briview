@@ -16,10 +16,21 @@ namespace briview {
 
   void writeColourTable( const colour_table & ctable, ofstream *fout )
 {
-    *fout<<ctable.r_lut[0]<<" "<<ctable.r_lut[1]<<" "<<ctable.r_lut[2]<<" "<<ctable.r_lut[3]<<" ";
-    *fout<<ctable.g_lut[0]<<" "<<ctable.g_lut[1]<<" "<<ctable.g_lut[2]<<" "<<ctable.g_lut[3]<<" ";
-    *fout<<ctable.b_lut[0]<<" "<<ctable.b_lut[1]<<" "<<ctable.b_lut[2]<<" "<<ctable.b_lut[3]<<" ";
-    *fout<<ctable.sc_lut[0]<<" "<<ctable.sc_lut[1]<<" "<<ctable.sc_lut[2]<<" "<<ctable.sc_lut[3]<<endl;
+    *fout<<ctable.r_lut[0]<<" "<<ctable.r_lut[1]<<" "<<ctable.r_lut[2]<<" "<<ctable.r_lut[3]<<" "<<ctable.r_lut[4]<<" "<<ctable.r_lut[5]<<" ";
+    *fout<<ctable.g_lut[0]<<" "<<ctable.g_lut[1]<<" "<<ctable.g_lut[2]<<" "<<ctable.g_lut[3]<<" "<<ctable.g_lut[4]<<" "<<ctable.g_lut[5]<<" ";
+    *fout<<ctable.b_lut[0]<<" "<<ctable.b_lut[1]<<" "<<ctable.b_lut[2]<<" "<<ctable.b_lut[3]<<" "<<ctable.b_lut[4]<<" "<<ctable.b_lut[5]<<" ";
+    *fout<<ctable.sc_lut[0]<<" "<<ctable.sc_lut[1]<<" "<<ctable.sc_lut[2]<<" "<<ctable.sc_lut[3]<<" "<<ctable.sc_lut[4]<<" "<<ctable.sc_lut[5]<<endl;
+}
+
+  void readColourTable( colour_table & ctable, stringstream & ss )
+{
+
+    ss>>ctable.r_lut[0]>>ctable.r_lut[1]>>ctable.r_lut[2]>>ctable.r_lut[3]>>ctable.r_lut[4]>>ctable.r_lut[5];
+    ss>>ctable.g_lut[0]>>ctable.g_lut[1]>>ctable.g_lut[2]>>ctable.g_lut[3]>>ctable.g_lut[4]>>ctable.g_lut[5];
+    ss>>ctable.b_lut[0]>>ctable.b_lut[1]>>ctable.b_lut[2]>>ctable.b_lut[3]>>ctable.b_lut[4]>>ctable.b_lut[5];
+    ss>>ctable.sc_lut[0]>>ctable.sc_lut[1]>>ctable.sc_lut[2]>>ctable.sc_lut[3]>>ctable.sc_lut[4]>>ctable.sc_lut[5];
+
+
 }
 
 }

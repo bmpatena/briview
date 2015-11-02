@@ -23,6 +23,8 @@ namespace briview{
         SurfaceContainer( );
         ~SurfaceContainer( );
         void writeSurfaces( std::ofstream *fout) const ;
+        void readSurfacesFromScene( std::ifstream *fout)  ;
+
         void writeSurface( ) const ;
 
         void addSurface( const std::string & filename, GLuint*  vbos);//fslvtkio::fslvtkIO* mesh , GLuint* verts);
@@ -191,7 +193,7 @@ namespace briview{
         std::vector< int > frontFace;
 
         std::vector<int> v_cmap_index;
-        std::vector< fslsurface_name::colour_table > v_surf_ctables; //contains images specific colour table
+        std::vector< fslsurface_name::colour_table > v_surf_ctables; //contains surface specific colour table
         std::vector< fslsurface_name::colour_table > v_ctables; //contains base colour tables, loaded from file
 
         std::vector< GLuint > glsl_programs;//compile GLSL program

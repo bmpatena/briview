@@ -27,111 +27,63 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass)
 {
-    cout<<"setupUi"<<endl;
-      ui->setupUi(this);
-      cout<<"done setup ui"<<endl;
-//    QAction *exitAction = new QAction(tr("Exit"), this);
-//    QAction *aboutAct = new QAction(tr("About"), this);
-//    QAction *aboutQtAct = new QAction(tr("About Qt"), this);
-
-//    connect(exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-//    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-//    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-//cout<<"add menu "<<endl;
-//    QMenu* fileMenu = menuBar()->addMenu(tr("File"));
-//    fileMenu->addAction(exitAction);
-//cout<<"done fielmenu"<<endl;
-//    QMenu* helpMenu = menuBar()->addMenu(tr("About"));
-//    helpMenu->addAction(aboutAct);
-//    helpMenu->addAction(aboutQtAct);
-//    cout<<"done about"<<endl;
-
-//    ui->menuBar->setVisible(true);
-    //setup menu
-//    QMenuBar *menuBar = new QMenuBar(0);
-//    menuBar->addMenu("file");
-//    setMenuBar(menuBar);
-
-//                  QIcon(":/images/open.png"), tr("&Open..."), this);
-//        openAct->setShortcuts(QKeySequence::Open);
-//        openAct->setStatusTip(tr("Open an existing file"));
-//        connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-//        fileMenu->addAction(openAct);
+	ui->setupUi(this);
 
 
-//          fileMenu->addAction(newAct);
-      ///done menubar setup
 
-    QGLFormat fmt = ui->openGLwidget->format();
-    fmt.setSwapInterval(1);
-    ui->openGLwidget->setFormat(fmt);
-    scene = new scene_properties();
+	QGLFormat fmt = ui->openGLwidget->format();
+	fmt.setSwapInterval(1);
+	ui->openGLwidget->setFormat(fmt);
 
-    im_vid_widget = new ImageVideoCapture();
-    im_vid_widget->setSceneWidget(scene);
-    imageContainer = new ImageContainer();
-    surfaceContainer = new SurfaceContainer();
-    marchingCubes_widget = new MarchingCubes();
+	//scene properties contain scene information such as camera,
+	//lighting, background colour, screen capture
+	scene = new scene_properties();
 
-    graphContainer_ = new graphContainer();
-graphContainer_->setVisible(0);
+	//Interactive video maker
+	im_vid_widget = new ImageVideoCapture();
+	im_vid_widget->setSceneWidget(scene);
 
-//    scene->setVisible(1);
-   scene->setVisible(0);
+	//Deals with image manipulation
+	imageContainer = new ImageContainer();
 
-//   imageContainer->setVisible(1);
-    imageContainer->setVisible(0);
-    imageContainer->setImVidCaptureForm( im_vid_widget );
+	//Allows surface manipulation
+	surfaceContainer = new SurfaceContainer();
 
-    //fixes wierd artifact, but of a hack but oh well
-//    surfaceContainer->setVisible(1);
-    surfaceContainer->setVisible(0);
+	//Provides options for marching cubes
+	marchingCubes_widget = new MarchingCubes();
 
-    surfaceContainer->importPresetMaterials(QApplication::applicationDirPath().toStdString() + "/assets/preset_materials.txt");
+
+	//3D graph/network visualization
+	graphContainer_ = new graphContainer();
+	graphContainer_->setVisible(0);
+
+	//setVisible indicates whether gui is visible
+	//    scene->setVisible(1);
+	scene->setVisible(0);
+
+	//   imageContainer->setVisible(1);
+	imageContainer->setVisible(0);
+	imageContainer->setImVidCaptureForm( im_vid_widget );
+
+	//    surfaceContainer->setVisible(1);
+	surfaceContainer->setVisible(0);
+	//files to load material definitions
+	surfaceContainer->importPresetMaterials(QApplication::applicationDirPath().toStdString() + "/assets/preset_materials.txt");
 
     //-----------------------SETUP DOCKS IN SIDE TAB-----------------------//
+	//Provides a sidebar dock for the various menus
+	//Set tab for surface, scene and image tabs
     this->addDockWidget(Qt::DockWidgetArea(0x2),imageContainer->getImageManipulatorWidget());
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),surfaceContainer->getSurfaceManipulatorWidget());
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),scene);
-
     tabifyDockWidget(imageContainer->getImageManipulatorWidget(),graphContainer_->getGraphManipulatorWidgets());
 
-    //setup menuBar
+    //Setup menuBar and link it's items to the function
     setUpMenu();
 
 
 
 
-
-    //-----------------------SETUP DOCKS IN SIDE TAB-----------------------//
-    cout<<"run connections"<<endl;
-
-    //----------------------SETUP SCENE CONNECTIONS----------------------//
-
-    connect(scene, SIGNAL(sig_changedMouseSensitivity(int)),this, SLOT(setMouseSensitivity(int)));
-    connect(scene, SIGNAL(sig_changedMouseMode(int)),this, SLOT(setMouseMode(int)));
-    connect(scene,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
-    connect(scene,SIGNAL(sig_but_up()),ui->openGLwidget,SLOT(camera_up()));
-    connect(scene,SIGNAL(sig_but_down()),ui->openGLwidget,SLOT(camera_down()));
-    connect(scene,SIGNAL(sig_but_left()),ui->openGLwidget,SLOT(camera_left()));
-    connect(scene,SIGNAL(sig_but_right()),ui->openGLwidget,SLOT(camera_right()));
-
-    connect(im_vid_widget, SIGNAL(sig_takeSnapShot()),this,SLOT(takeSnapShot()));
-    connect(im_vid_widget, SIGNAL(sig_mov(bool)),this,SLOT(createMovie(bool)));
-
-    //----------------setup surface conntainer connections--------------//
-    //----------------------END SETUP SCENE CONNECTIONS----------------------//
-    connect(surfaceContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
-
-    connect(surfaceContainer,SIGNAL(sig_appendSurfaceData()),this,SLOT(doAppendSurfaceData()));
-    //----------------end setup surface conntainer connections--------------//
-
-    connect(imageContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
-    connect(marchingCubes_widget,SIGNAL(sig_apply()),this,SLOT(doMarchingCubes()));
-
-    connect(graphContainer_,SIGNAL(sig_copy_to_surfaces()),this, SLOT(copyGraphToSurfaces()));
-    connect(graphContainer_,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
 
     //----------------------END SETUP ACTION CONNECTIONS (Toolbar)------------------//
 
@@ -220,6 +172,32 @@ void MainWindow::setUpMenu()
     menu_scene->addAction(actionBackground_Colour);
     menu_scene->addAction(actionScreen_Capture);
 
+    //----------------------SETUP SCENE CONNECTIONS----------------------//
+
+       connect(scene, SIGNAL(sig_changedMouseSensitivity(int)),this, SLOT(setMouseSensitivity(int)));
+       connect(scene, SIGNAL(sig_changedMouseMode(int)),this, SLOT(setMouseMode(int)));
+       connect(scene,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+       connect(scene,SIGNAL(sig_but_up()),ui->openGLwidget,SLOT(camera_up()));
+       connect(scene,SIGNAL(sig_but_down()),ui->openGLwidget,SLOT(camera_down()));
+       connect(scene,SIGNAL(sig_but_left()),ui->openGLwidget,SLOT(camera_left()));
+       connect(scene,SIGNAL(sig_but_right()),ui->openGLwidget,SLOT(camera_right()));
+
+       connect(im_vid_widget, SIGNAL(sig_takeSnapShot()),this,SLOT(takeSnapShot()));
+       connect(im_vid_widget, SIGNAL(sig_mov(bool)),this,SLOT(createMovie(bool)));
+
+       //----------------setup surface conntainer connections--------------//
+       //----------------------END SETUP SCENE CONNECTIONS----------------------//
+       connect(surfaceContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+
+       connect(surfaceContainer,SIGNAL(sig_appendSurfaceData()),this,SLOT(doAppendSurfaceData()));
+       //----------------end setup surface conntainer connections--------------//
+
+       connect(imageContainer,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+       connect(marchingCubes_widget,SIGNAL(sig_apply()),this,SLOT(doMarchingCubes()));
+
+       connect(graphContainer_,SIGNAL(sig_copy_to_surfaces()),this, SLOT(copyGraphToSurfaces()));
+       connect(graphContainer_,SIGNAL(sig_updateGL()),ui->openGLwidget,SLOT(updateGL()));
+
 
     /// -------
     /////--------Image MENU
@@ -275,6 +253,7 @@ void MainWindow::setUpMenu()
     QAction* actionColour_Bar = new QAction(tr("&Colour Bar..."),0);
     QAction* actionPolygon_Rendering = new QAction(tr("&Polygon Rendering..."),0);
     QAction* actionSlice_Surface = new QAction(tr("&Slice Surface..."),0);
+    QAction* actionGLSL = new QAction(tr("&GLSL shaders..."),0);
 
     //-----surface actions--------------//
     connect(actionSurface_Manipulator_Sidebar,SIGNAL(toggled(bool)),surfaceContainer,SLOT(setVisible(bool)));
@@ -296,6 +275,7 @@ void MainWindow::setUpMenu()
     menu_surface->addAction(actionColour_Bar);
     menu_surface->addAction(actionPolygon_Rendering);
     menu_surface->addAction(actionSlice_Surface);
+    menu_surface->addAction(actionGLSL);
 
 
     /// -------
@@ -321,22 +301,22 @@ void MainWindow::setUpMenu()
 }
 void MainWindow::copyGraphToSurfaces()
 {
-    cout<<"copyGraphToSurfaces "<<endl;
-    GLuint* vbos = new GLuint[2];
+	cout<<"copyGraphToSurfaces "<<endl;
+	GLuint* vbos = new GLuint[2];
 
-    glGenBuffersARB(2,vbos);
-  //  surfaceContainer->addSurface(filename.toStdString(),vbos);
-//   addColourBarToSurface();
-     fslSurface<float,unsigned int> *graph_surf_nodes = new fslSurface<float,unsigned int>();
-   *graph_surf_nodes = graphContainer_->getGraphNodesAsSurface();
-    surfaceContainer->addSurface(graph_surf_nodes,vbos,"graph_nodes_to_surface");
+	glGenBuffersARB(2,vbos);
+	//  surfaceContainer->addSurface(filename.toStdString(),vbos);
+	//   addColourBarToSurface();
+	fslSurface<float,unsigned int> *graph_surf_nodes = new fslSurface<float,unsigned int>();
+	*graph_surf_nodes = graphContainer_->getGraphNodesAsSurface();
+	surfaceContainer->addSurface(graph_surf_nodes,vbos,"graph_nodes_to_surface");
 
-    GLuint* vbos_links = new GLuint[2];
+	GLuint* vbos_links = new GLuint[2];
 
-    glGenBuffersARB(2,vbos_links);
-    fslSurface<float,unsigned int> *graph_surf_links = new fslSurface<float,unsigned int>();
-  *graph_surf_links = graphContainer_->getGraphLinksAsSurface();
-   surfaceContainer->addSurface(graph_surf_links,vbos_links,"graph_links_to_surface");
+	glGenBuffersARB(2,vbos_links);
+	fslSurface<float,unsigned int> *graph_surf_links = new fslSurface<float,unsigned int>();
+	*graph_surf_links = graphContainer_->getGraphLinksAsSurface();
+	surfaceContainer->addSurface(graph_surf_links,vbos_links,"graph_links_to_surface");
 
 
 }
@@ -348,7 +328,6 @@ void MainWindow::showMarchingCubes()
 
 void MainWindow::takeSnapShot()
 {
-    cout<<"let see if we can do a screen capture"<<endl;
     ImageVideoCapture::CompressionType comp_type;
     string filename;
     int numViews;
@@ -357,30 +336,28 @@ void MainWindow::takeSnapShot()
    // ui->openGLwidget->renderCapture(filename  , comp_type, 10, 60, 90,90,10,10,10);
 
    ui->openGLwidget->renderCapture(filename, comp_type, numViews);
-cout<<filename<<" "<<endl;
-cout<<comp_type<<" "<<numViews<<endl;
-    cout<<"done render capture"<<endl;
+
 }
 void MainWindow::createMovie( bool write)
 {
 
-    cout<<"Create movie"<<endl;
-    ImageVideoCapture::CompressionType comp_type;
-    string filename;
-    int numViews;
-    im_vid_widget->getImageProperties(filename,comp_type,numViews);
-    //time in seconds
-    unsigned int fps =im_vid_widget->getFPS();
-   // float duration,tx,ty,tz,theta,phi;
-    filename = im_vid_widget->getMovieName().toStdString();
-    //im_vid_widget->getMovieProperties(filename,fps,duration,tx,ty,tz,theta,phi);
-    vector< animationParams > v_anims = im_vid_widget->getAnimationList();
- //   ui->openGLwidget->renderCapture(filename  , write, comp_type, fps,duration,theta,phi,tx,ty,tz);
- ui->openGLwidget->renderCaptureList(filename,write,comp_type, v_anims,fps);
-//   ui->openGLwidget->renderCapture(filename, comp_type, numViews);
-cout<<filename<<" "<<endl;
-cout<<comp_type<<" "<<numViews<<endl;
-    cout<<"done Create Movie"<<endl;
+	cout<<"Create movie"<<endl;
+	ImageVideoCapture::CompressionType comp_type;
+	string filename;
+	int numViews;
+	im_vid_widget->getImageProperties(filename,comp_type,numViews);
+	//time in seconds
+	unsigned int fps =im_vid_widget->getFPS();
+	// float duration,tx,ty,tz,theta,phi;
+	filename = im_vid_widget->getMovieName().toStdString();
+	//im_vid_widget->getMovieProperties(filename,fps,duration,tx,ty,tz,theta,phi);
+	vector< animationParams > v_anims = im_vid_widget->getAnimationList();
+	//   ui->openGLwidget->renderCapture(filename  , write, comp_type, fps,duration,theta,phi,tx,ty,tz);
+	ui->openGLwidget->renderCaptureList(filename,write,comp_type, v_anims,fps);
+	//   ui->openGLwidget->renderCapture(filename, comp_type, numViews);
+	cout<<filename<<" "<<endl;
+	cout<<comp_type<<" "<<numViews<<endl;
+	cout<<"done Create Movie"<<endl;
 }
 
 
@@ -391,97 +368,71 @@ cout<<comp_type<<" "<<numViews<<endl;
 void MainWindow::doMarchingCubes()
 {
 
-    cout<<"run marching cubes"<<endl;
+	vector<float> image;// = NULL;
+	int count=0;
+	vector<int> indices = imageContainer->getSelectedImageIndices();
+	for ( vector<int>::iterator i_ind = indices.begin(); i_ind != indices.end();++i_ind,++count)
+	{
+		fslSurface<float,unsigned int>* surface = new fslSurface<float,unsigned int>();
 
-    vector<float> image;// = NULL;
-int count=0;
-    vector<int> indices = imageContainer->getSelectedImageIndices();
-    for ( vector<int>::iterator i_ind = indices.begin(); i_ind != indices.end();++i_ind,++count)
-    {
-        fslSurface<float,unsigned int>* surface = new fslSurface<float,unsigned int>();
+		image_dims dims = imageContainer->getImageApplyBiasScale(image,*i_ind);
 
-        cout<<"INMAGE INDEX "<<*i_ind<<endl;
-        image_dims dims = imageContainer->getImageApplyBiasScale(image,*i_ind);
-        cout<<"run marching cubes1 "<<dims.xdim<<" "<<dims.ydim<<" "<<dims.zdim<<endl;
-        cout<<"run marching cubes1 "<<dims.xsize<<" "<<dims.ysize<<" "<<dims.zsize<<endl;
+		if (!marchingCubes_widget->getDoAllLabels())
+		{
+			marchingCubes<float,unsigned int,float>(*surface, &(image[0]), dims,marchingCubes_widget->getThreshold(), marchingCubes_widget->getLabel(),static_cast<MarchingCubesMode>( marchingCubes_widget->getThresholdMode()));
 
-        cout<<"run marching cubes2 "<<image[0]<<endl;
-
-        cout<<"run marching cubes "<<endl;
-        //float scale = imageContainer->getCurrentImageScale();
-        //float bias = imageContainer->getCurrentImageBias();
-
-       // * v_im_thresh_scale[index] + v_im_thresh_bias[index] ;
-    cout<<"image"<<endl;
-    //for (int i = 0 ; i < dims.xsize*dims.ysize* dims.zsize; ++i)
-    //    cout<<i<<" "<<image[i]<<endl;
-        cout<<marchingCubes_widget->getThreshold()<<" "<< marchingCubes_widget->getLabel()<<" "<<marchingCubes_widget->getThresholdMode()<<endl;
-
-        if (!marchingCubes_widget->getDoAllLabels())
-        {
-            marchingCubes<float,unsigned int,float>(*surface, &(image[0]), dims,marchingCubes_widget->getThreshold(), marchingCubes_widget->getLabel(),static_cast<MarchingCubesMode>( marchingCubes_widget->getThresholdMode()));
-
-        }else{
-            runMarchingCubesOnAllLabels<float,unsigned int,float>(*surface, &(image[0]), dims,marchingCubes_widget->getThreshold());
-        }
+		}else{
+			runMarchingCubesOnAllLabels<float,unsigned int,float>(*surface, &(image[0]), dims,marchingCubes_widget->getThreshold());
+		}
 
 
 
 
 
-        vector<double> xfm = imageContainer->getImageXFM(*i_ind);//getCurrentImageXFM();
-        Matrix mxfm(4,4);
-        mxfm=0;
-    cout<<"Nverst "<<surface->getNumberOfVertices()<<endl;
-        cout<<"vector "<<endl;
-        cout<<"xfm "<<endl;
-        for (int i =0 ; i < 4 ; ++i)
-        {       for (int j = 0 ; j < 4; ++j)
-            {
-                mxfm.element(i,j) = xfm[j+i*4];
-                cout<<xfm[j+i*4]<<" ";//<<endl;
-                }
-        cout<<endl;
-    }
-        //for (vector<double>::iterator i = xfm.begin(); i != xfm.end(); ++i)
-       // {
-        //    cout<<"xfm "<<*i<<endl;
-         //   mxfm<<*i;
-        //}
-        cout<<"mxfm "<<mxfm.element(0,0)<<" "<<mxfm.element(1,1)<<" "<<mxfm.element(2,2)<<endl;
-        mxfm=mxfm.t();
-        cout<<"mxfm "<<endl;
-        for (int i =0 ; i < 4 ; ++i)
-        {   for (int j = 0 ; j < 4; ++j)
-            {
-                xfm[j+i*4] = mxfm.element(i,j) ;
-                cout<<xfm[j+i*4]<<" ";
-                }
-            cout<<endl;
-        }
-        apply_xfm<float, unsigned int,double>( *surface, xfm);//imageContainer->getCurrentImageXFM() );
+		vector<double> xfm = imageContainer->getImageXFM(*i_ind);//getCurrentImageXFM();
+		Matrix mxfm(4,4);
+		mxfm=0;
+//		cout<<"Nverst "<<surface->getNumberOfVertices()<<endl;
+//		cout<<"vector "<<endl;
+//		cout<<"xfm "<<endl;
+		for (int i =0 ; i < 4 ; ++i)
+		{       for (int j = 0 ; j < 4; ++j)
+		{
+			mxfm.element(i,j) = xfm[j+i*4];
+//			cout<<xfm[j+i*4]<<" ";//<<endl;
+		}
+//		cout<<endl;
+		}
 
-        vector< float > csys_eye(16,0);
-        csys_eye[0]=1;
-        csys_eye[5]=1;
-        csys_eye[10]=1;
-        csys_eye[15]=1;
-        surface->addCoordSystem( csys_eye, "NIFTI_XFORM_SCANNER_ANAT");
-        QString basename = imageContainer->getImageName(*i_ind);
-        basename.replace(".nii.gz","");
-        stringstream ss ;
-        ss<<count;
-       // string scount;
-       // ss>>scount;
-           addSurfaceToContainer(surface,basename.toStdString() + "_marchingcubes_" + marchingCubes_widget->getLabelAsString());//+"_"+scount);
-      //  writeGIFTI(surface,"test.gii");
-    //cout"dine write "<<endl;
-        //surface->save("test.gii");
-        //if (image != NULL)
-        //    delete[] image;
-          // delete surface;
-    }
-ui->openGLwidget->updateGL();
+		//		cout<<"mxfm "<<mxfm.element(0,0)<<" "<<mxfm.element(1,1)<<" "<<mxfm.element(2,2)<<endl;
+		mxfm=mxfm.t();
+		//		cout<<"mxfm "<<endl;
+		for (int i =0 ; i < 4 ; ++i)
+		{   for (int j = 0 ; j < 4; ++j)
+		{
+			xfm[j+i*4] = mxfm.element(i,j) ;
+			//			cout<<xfm[j+i*4]<<" ";
+		}
+		//		cout<<endl;
+		}
+		apply_xfm<float, unsigned int,double>( *surface, xfm);//imageContainer->getCurrentImageXFM() );
+
+		vector< float > csys_eye(16,0);
+		csys_eye[0]=1;
+		csys_eye[5]=1;
+		csys_eye[10]=1;
+		csys_eye[15]=1;
+		surface->addCoordSystem( csys_eye, "NIFTI_XFORM_SCANNER_ANAT");
+		QString basename = imageContainer->getImageName(*i_ind);
+		basename.replace(".nii.gz","");
+		stringstream ss ;
+		ss<<count;
+
+
+		addSurfaceToContainer(surface,basename.toStdString() + "_marchingcubes_" + marchingCubes_widget->getLabelAsString());//+"_"+scount);
+
+	}
+	ui->openGLwidget->updateGL();
 }
 
 void MainWindow::doAddImage()
@@ -632,6 +583,7 @@ void MainWindow::writeSceneToFile()
         sceneWriter* f_scene = new sceneWriter(filename.toStdString());
         f_scene->writeSceneProperties(scene);
         f_scene->writeSceneSurfaces(surfaceContainer);
+        f_scene->writeSceneImages(imageContainer);
 
         delete f_scene;
     }
@@ -651,6 +603,18 @@ void MainWindow::readSceneFromFile()
         delete f_scene;
 
     }
+}
+void MainWindow::readSceneFromFile( const string & filename)
+{
+
+        sceneReader* f_scene = new sceneReader(filename);
+        f_scene->readSceneProperties(scene);
+        f_scene->readSceneSurfaces(surfaceContainer);
+
+        ui->openGLwidget->updateGL();
+
+        delete f_scene;
+
 }
 
 void MainWindow::readGraphFromFile(){

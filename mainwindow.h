@@ -58,6 +58,8 @@ void addColourBarToImage();
     void writeSurface();
     void writeSceneToFile();
     void readSceneFromFile();
+    void readSceneFromFile( const std::string & filename);
+
     void readGraphFromFile();
 
 private:

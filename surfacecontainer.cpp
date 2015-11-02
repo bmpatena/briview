@@ -112,6 +112,48 @@ namespace briview{
          writeGIFTI(*v_surfaces[surf_form->getCurrentSurfaceIndex()],fileName.toStdString());
 
     }
+    void SurfaceContainer::readSurfacesFromScene( std::ifstream *fin)
+    {
+    	string line;
+cout<<"read surfs from scene "<<endl;
+    	while (getline(*fin,line))
+    	{
+    		cout<<"line "<<line<<endl;
+
+    		stringstream ss(line);
+    		string keyword;
+    		ss>>keyword;
+    		if ( keyword == "filename" )
+    		{
+
+    			string filename;
+    			ss>>filename;
+    			//need to valid vbos from this current context, 0:vertices, 1:incdices
+    			GLuint* vbos = new GLuint[2];
+
+    			glGenBuffersARB(2,vbos);
+    			addSurface(filename,vbos);
+    			cout<<"add glyphs"<<endl;
+
+    			//    addGlyphsToSurface(surfaceContainer->getNumberOfSurfaces()-1);
+    			cout<<"add color bar"<<endl;
+    			//    	            	    addColourBarToSurface();
+    		}else if ( keyword == "ColourTable" )
+    		{
+    			fslsurface_name::colour_table c_table;
+    			 readColourTable( c_table,  ss );
+    			v_surf_ctables.push_back(c_table);
+
+    		    v_cmap_index.back()=0;
+
+    		          surf_form->setColourTableIndex(0);
+
+    		}
+    	}
+    }
+
+
+
     void SurfaceContainer::writeSurfaces( ofstream *fout) const
     {
         *fout<<"Surfaces "<<surface_filenames.size()<<endl;
@@ -119,9 +161,9 @@ namespace briview{
         vector< int >::const_iterator i_glsl = surf_glsl_programs.begin();
         vector< int >::const_iterator i_imat = surf_material_index.begin();
         vector< material >::const_iterator i_mat = v_materials.begin();
-        vector< colour_table >::const_iterator i_ctab = v_ctables.begin();
+//        vector< colour_table >::const_iterator i_ctab = v_ctables.begin();
        // vector< bound >::const_iterator i_ctab = v_ctables.begin();
-
+        vector< colour_table >::const_iterator i_ctab = v_surf_ctables.begin();
         for (vector<string>::const_iterator i =  surface_filenames.begin() ; i != surface_filenames.end(); i++, i_mat++, i_imat++, i_glsl++, i_ctab++)
         {
             *fout<<"filename "<<*i<<endl;
@@ -1146,7 +1188,7 @@ delete[] m;
 
 
 //        glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    cout<<"surface-blendfunc "<<blendFunc<<endl;
+//    cout<<"surface-blendfunc "<<blendFunc<<endl;
         switch (blendFunc)
         {
 
@@ -1223,7 +1265,6 @@ delete[] m;
     }
     void SurfaceContainer::renderTranslucentSurfaces()
     {
-        cout<<"render translucent "<<endl;
         glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 //        glBlendFunc (GL_SRC_ALPHA,GL_ONE);
 //        glBlendFunc (GL_ONE_MINUS_DST_COLOR,GL_DST_COLOR);

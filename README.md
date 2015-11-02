@@ -15,10 +15,23 @@ Some key features include:
 * [libtiff](http://www.remotesensing.org/libtiff/v4.0.6.html)
 * [mp4v2](https://code.google.com/p/mp4v2/)
 
-#Usage
+#Manual 
+====
 
 ##Menu
 Most menus are dockable and hideable. This allows the flexibility to customs your interactive environment. For example, I like to have the camerca interactor floating.
+
+
+##Menu Bar - File 
+* **Load Image** : Loads a NIFTI 3D volumes for display (using orthogonal slices)
+* **Load Surface** : Loads a surface file (GIFTI,PLY,VTK). A set of vertices, faces and other information.
+* **Append Surface Data** : Appends surfaces  (GIFTI,PLY,VTK) to another. Can combine surfaces into a single file in this manner.
+* **Save Surface** : Save surface to file.
+* **save scene** : Save scene information. This is a shallow save. It includes the scene parameters (camera, lighting, background colour), surfaces (paths to surface files and rendering options), and images ( 3D volumes and rendering options).
+* **load scene** : Loads scene include links and images. Requires that the files exist.
+* **load graph** : Load a graph/network from file. Custom format (see graph section).
+
+
 
 ##Loading and Saving Data 
 

@@ -38,6 +38,7 @@ connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
         connect(ui->pos_x, SIGNAL(textEdited(QString)),this,SLOT(set_LightPosition()));
         connect(ui->pos_y, SIGNAL(textEdited(QString)),this,SLOT(set_LightPosition()));
         connect(ui->pos_z, SIGNAL(textEdited(QString)),this,SLOT(set_LightPosition()));
+        connect(ui->pos_w, SIGNAL(textEdited(QString)),this,SLOT(set_LightPosition()));
 
         connect(ui->global_amb_r, SIGNAL(textEdited(QString)),this,SLOT(set_GlobalLightAmbient()));
         connect(ui->global_amb_g, SIGNAL(textEdited(QString)),this,SLOT(set_GlobalLightAmbient()));
@@ -155,25 +156,35 @@ connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
         delete[] background_color;
     }
 
+
+
+    void scene_properties::set_bgcolor_ui(const fslsurface_name::float4 & bg_color_in )
+    {
+
+    }
+
+
+
     void  scene_properties::writeSceneProperties(   ofstream * fout)
     {
         *fout<<"scene"<<endl;
-        *fout<<"camera"<<endl;
+        *fout<<"camera ";
         *fout<<eye.x<<" "<<eye.y<<" "<<eye.z<<" ";
         *fout<<center.x<<" "<<center.y<<" "<<center.z<<" ";
         *fout<<vup.x<<" "<<vup.y<<" "<<vup.z<<endl;
+        *fout<<"bg_colour "<<background_color[0]<<" "<<background_color[1]<<" "<<background_color[2]<<" "<<background_color[3]<<endl;
 
         //use 0 for perspective, incase want to remember in future
-        *fout<<"projection "<<proj_mode<<endl;
-        *fout<<gluPersp_params.x<<" "<<gluPersp_params.y<<" "<<gluPersp_params.z<<" "<<gluPersp_params.w<<endl;
+        *fout<<"projection "<<proj_mode<<gluPersp_params.x<<" "<<gluPersp_params.y<<" "<<gluPersp_params.z<<" "<<gluPersp_params.w<<endl;
         *fout<<"globalAmbient "<<global_ambient[0]<<" "<<global_ambient[1]<<" "<<global_ambient[2]<<" "<<global_ambient[3]<<endl;
         *fout<<"lights "<<Nlights<<endl;
         for (int i=0;i<Nlights;i++)
         {
-            *fout<<ambient.at(i)[0]<<" "<<ambient.at(i)[1]<<" "<<ambient.at(i)[2]<<" "<<ambient.at(i)[3]<<endl;
-            *fout<<diffuse.at(i)[0]<<" "<<diffuse.at(i)[1]<<" "<<diffuse.at(i)[2]<<" "<<diffuse.at(i)[3]<<endl;
-            *fout<<specular.at(i)[0]<<" "<<specular.at(i)[1]<<" "<<specular.at(i)[2]<<" "<<specular.at(i)[3]<<endl;
-            *fout<<ambient.at(i)[0]<<" "<<position.at(i)[1]<<" "<<position.at(i)[2]<<" "<<position.at(i)[3]<<endl;
+        	*fout<<"lights ";
+            *fout<<ambient.at(i)[0]<<" "<<ambient.at(i)[1]<<" "<<ambient.at(i)[2]<<" "<<ambient.at(i)[3];
+            *fout<<" "<<diffuse.at(i)[0]<<" "<<diffuse.at(i)[1]<<" "<<diffuse.at(i)[2]<<" "<<diffuse.at(i)[3];
+            *fout<<" "<<specular.at(i)[0]<<" "<<specular.at(i)[1]<<" "<<specular.at(i)[2]<<" "<<specular.at(i)[3];
+            *fout<<" "<<ambient.at(i)[0]<<" "<<position.at(i)[1]<<" "<<position.at(i)[2]<<" "<<position.at(i)[3]<<endl;
 
         }
 
@@ -184,28 +195,139 @@ connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
     {
         cout<<"reading scene properties "<<endl;
         //max 256 characters on comment lines
-        char line[256];
-        fin->getline(line,256);//scene
-        fin->getline(line,256);//camera
-        *fin>>eye.x>>eye.y>>eye.z;
-        *fin>>center.x>>center.y>>center.z;
-        *fin>>vup.x>>vup.y>>vup.z;
-        cout<<"eye "<<eye.x<<" "<<eye.y<<" "<<eye.z<<endl;
-        //use 0 for perspective, incase want to remember in future
-        int proj_mode_temp;
-        *fin>>proj_mode_temp;//projection
-        proj_mode=static_cast<PROJECTION_METHOD>(proj_mode_temp);
-        *fin>>gluPersp_params.x>>gluPersp_params.y>>gluPersp_params.z>>gluPersp_params.w;
-        *fin>>global_ambient[0]>>global_ambient[1]>>global_ambient[2]>>global_ambient[3];
-        *fin>>Nlights;
-        for (int i=0;i<Nlights;i++)
+
+   	 int proj_mode=0;
+
+        string line;
+
+        while (getline(*fin,line))
         {
-            *fin>>ambient.at(i)[0]>>ambient.at(i)[1]>>ambient.at(i)[2]>>ambient.at(i)[3];
-            *fin>>diffuse.at(i)[0]>>diffuse.at(i)[1]>>diffuse.at(i)[2]>>diffuse.at(i)[3];
-            *fin>>specular.at(i)[0]>>specular.at(i)[1]>>specular.at(i)[2]>>specular.at(i)[3];
-            *fin>>ambient.at(i)[0]>>position.at(i)[1]>>position.at(i)[2]>>position.at(i)[3];
+            stringstream ss(line);
+            string keyword;
+            ss>>keyword;
+             if ( keyword == "camera" )
+             {
+            	 ss>>eye.x>>eye.y>>eye.z>>center.x>>center.y>>center.z>>vup.x>>vup.y>>vup.z;
+                   setCameraParameters(eye,center,vup);
+
+             }else if (keyword == "bg_colour" )
+             {
+            	 ss>>background_color[0]>>background_color[1]>>background_color[2]>>background_color[3];
+            	 set_BgColor_Text();
+             }else if (keyword == "projection" )
+             {
+            	 int proj_mode_temp;
+            	        ss>>proj_mode_temp;//projection
+            	 proj_mode=static_cast<PROJECTION_METHOD>(proj_mode_temp);
+            	 ss>>gluPersp_params.x>>gluPersp_params.y>>gluPersp_params.z>>gluPersp_params.w;
+                 set_gluPersp_params(gluPersp_params);
+
+             }else if (keyword == "globalAmbient" )
+             {
+            	 ss>>global_ambient[0]>>global_ambient[1]>>global_ambient[2]>>global_ambient[3];
+            	 set_GlobalLightAmbientText();
+             }else if (keyword == "lights" )
+             {
+            	 //starts with 1 light
+            	 ss>>Nlights;
+            	 ss>>global_ambient[0]>>global_ambient[1]>>global_ambient[2]>>global_ambient[3];
+            //	 count
+				// 	 addLight
+            	 //delete current lights if there more than Nlights
+            	 if (Nlights > 0)
+            	 {
+            		 cout<<"nlights "<<Nlights<<endl;
+
+            		 for (vector<GLfloat*>::iterator i=ambient.begin();i!=ambient.end();i++)
+            			 delete[] *i;
+            		 for (vector<GLfloat*>::iterator i=diffuse.begin();i!=diffuse.end();i++)
+            			 delete[] *i;
+            		 for (vector<GLfloat*>::iterator i=specular.begin();i!=specular.end();i++)
+            			 delete[] *i;
+            		 for (vector<GLfloat*>::iterator i=position.begin();i!=position.end();i++)
+            			 delete[] *i;
+            		 cout<<"done delete "<<endl;
+            		 ambient.clear();
+            		 diffuse.clear();
+            		 specular.clear();
+            		 position.clear();
+            		 cout<<"done clear "<<endl;
+
+//            		 ui->lights_list->clear();
+            		 cout<<"done list clear "<<endl;
+
+            		 cout<<"lisght size "<<endl;
+
+            	 }
+            	 for (int i=0;i<Nlights;i++)
+            	 {
+            		 cout<<"light "<<i<<endl;
+            		 getline(*fin,line);
+            		 stringstream ss(line);
+            		 string keyword;
+            		 ss>>keyword;
+
+            		 GLfloat* pos0 = new GLfloat[4];
+            		 GLfloat* dif0 = new GLfloat[4];
+            		 GLfloat* spec0 = new GLfloat[4];
+            		 GLfloat* amb0 = new GLfloat[4];
+
+            		 ss>>amb0[0]>>amb0[1]>>amb0[2]>>amb0[3];
+            		 ss>>dif0[0]>>dif0[1]>>dif0[2]>>dif0[3];
+            		 ss>>spec0[0]>>spec0[1]>>spec0[2]>>spec0[3];
+            		 ss>>pos0[0]>>pos0[1]>>pos0[2]>>pos0[3];
+
+            		   stringstream ss_n;
+            		   ss_n<<i;
+            		        string num;
+            		        ss_n>>num;
+                       	 cout<<"add light to list"<<endl;
+
+                       	 if (i>1)
+                       	 {
+            	        ui->lights_list->addItem(QString(("GL_LIGHT"+num).c_str()));
+                       	 }
+            		 ambient.push_back(amb0);
+            		 diffuse.push_back(dif0);
+            		 specular.push_back(spec0);
+            		 position.push_back(pos0);
+            		 set_LightAmbientText( 0 );
+            		           		            	         set_LightDiffuseText( 0 );
+            		            		            	         set_LightSpecularText( 0 );
+            		            		            	         set_LightPositionText( 0 );
+
+            	       	 //
+					 //            	        	ss>>ambient.at(i)[0]>>ambient.at(i)[1]>>ambient.at(i)[2]>>ambient.at(i)[3];
+            		 //            	        	ss>>diffuse.at(i)[0]>>diffuse.at(i)[1]>>diffuse.at(i)[2]>>diffuse.at(i)[3];
+            		 //            	        	ss>>specular.at(i)[0]>>specular.at(i)[1]>>specular.at(i)[2]>>specular.at(i)[3];
+            		 //            	            ss>>ambient.at(i)[0]>>position.at(i)[1]>>position.at(i)[2]>>position.at(i)[3];
+
+            	 }
+            	 cout<<"done add"<<endl;
+            	 if (Nlights>0)
+            	 {
+//            		 ui->lights_list->clear();
+
+
+//            		 set_LightAmbientText( 0 );
+//            		            	         set_LightDiffuseText( 0 );
+//            		            	         set_LightSpecularText( 0 );
+//            		            	         set_LightPositionText( 0 );
+
+            	 }
+
+
+             }
 
         }
+
+        //use 0 for perspective, incase want to remember in future
+
+
+
+
+
+
 
 
 
@@ -662,7 +784,7 @@ connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
     void scene_properties::set_LightAmbientText( const int & index )
     {
         QString temp;
-
+        cout<<" ambient.at( index )[0] "<< ambient.at( index )[0]<<endl;
         temp.setNum( ambient.at( index )[0],'g',4);
         ui->amb_r->setText(temp);
         temp.setNum( ambient.at( index )[1],'g',4);
@@ -672,6 +794,22 @@ connect(ui->but_right,SIGNAL(pressed()), this, SIGNAL(sig_but_right()));
         temp.setNum( ambient.at( index )[3],'g',4);
         ui->amb_a->setText(temp);
     }
+    void scene_properties::set_BgColor_Text()
+    {
+    	 QString temp;
+
+    	        temp.setNum( background_color[0],'g',4);
+    	        ui->bg_color_r->setText(temp);
+    	        temp.setNum( background_color[1],'g',4);
+    	        ui->bg_color_g->setText(temp);
+    	        temp.setNum( background_color[2],'g',4);
+    	        ui->bg_color_b->setText(temp);
+    	        temp.setNum( background_color[3],'g',4);
+    	        ui->bg_color_a->setText(temp);
+
+    	        set_ClearColor();
+    }
+
     void scene_properties::set_GlobalLightAmbientText( )
     {
         QString temp;

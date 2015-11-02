@@ -1648,82 +1648,82 @@ void myOpenGLWidget::resizeGL(int w, int h)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #endif
-    cout<<"done iniatlize GL"<<endl;
+
 }
 
 
 
 void myOpenGLWidget::paintGL()
 {
-    cout<<"paintGL"<<endl;
+
 #ifdef GL_GLEXT_PROTOTYPES 
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo);
+	glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo);
 #else
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
 #endif
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT );
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT );
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    scene_props->setLights();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	scene_props->setLights();
 
-    scene_props->setCameraOrientation();
-    // scene_props->setLights();
-    //-----RENDER Opaque OBJECTS------------//
+	scene_props->setCameraOrientation();
+	// scene_props->setLights();
+	//-----RENDER Opaque OBJECTS------------//
 
-    //glDepthMask(GL_TRUE);
+	//glDepthMask(GL_TRUE);
 
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    images->renderSlices();
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	images->renderSlices();
 
-    // glUseProgram(p_light_dir_map_scalars);
-    //images->renderColourBar();
-    //cout<<"p_light_dir "<<p_light_dir_map_scalars<<endl;
-    // glDisable(GL_DEPTH_TEST);
+	// glUseProgram(p_light_dir_map_scalars);
+	//images->renderColourBar();
+	//cout<<"p_light_dir "<<p_light_dir_map_scalars<<endl;
+	// glDisable(GL_DEPTH_TEST);
 
-    //glUseProgram(p_light_dir_map_scalars);
-    images->renderColourBar();
-    //render command handles the progam setting
+	//glUseProgram(p_light_dir_map_scalars);
+	images->renderColourBar();
+	//render command handles the progam setting
 
-    surfaces->setEyeCentre(scene_props->getCameraEye(), scene_props->getCameraCenter());
+	surfaces->setEyeCentre(scene_props->getCameraEye(), scene_props->getCameraCenter());
 
-    //  HERE  surfaces->renderOpaqueSurfaces();
-    surfaces->renderOpaqueSurfaces();
-    cout<<"render surfa es"<<endl;
-    surfaces->renderOpaqueGlyphs();
-    glUseProgram(p_light_dir_map_scalars);
-    cout<<"render colour bar"<<endl;
-    surfaces->renderColourBar();
-    //cout<<"done rende cbar"<<endl;
+	//  HERE  surfaces->renderOpaqueSurfaces();
+	surfaces->renderOpaqueSurfaces();
 
-    //-----RENDER TRANSLUCENT OBJECTS------------//
-    // glDisable(GL_DEPTH_TEST);
-    glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	surfaces->renderOpaqueGlyphs();
+	glUseProgram(p_light_dir_map_scalars);
 
-    glDepthMask(GL_FALSE);
+	surfaces->renderColourBar();
+	//cout<<"done rende cbar"<<endl;
 
+	//-----RENDER TRANSLUCENT OBJECTS------------//
+	// glDisable(GL_DEPTH_TEST);
+	glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    surfaces->renderTranslucentSurfaces();
-    surfaces->renderTranslucentGlyphs();
-    cout<<"render graph"<<endl;
-    if (graph_->doRender())
-        graph_->render();
-    cout<<"done render graph"<<endl;
+	glDepthMask(GL_FALSE);
 
 
-    glDepthMask(GL_TRUE);
+	surfaces->renderTranslucentSurfaces();
+	surfaces->renderTranslucentGlyphs();
+
+
+	if (graph_->doRender())
+		graph_->render();
+
+
+	glDepthMask(GL_TRUE);
 
 
 #ifdef GL_GLEXT_PROTOTYPES 
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-    glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo);
+	glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+	glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 #else
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 #endif
 
