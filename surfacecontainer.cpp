@@ -48,7 +48,7 @@ namespace briview{
         connect(surf_form,SIGNAL(sig_changedColourTable(int)),this, SLOT(changeColourTable(int)));
 
 
-        connect(surf_form,SIGNAL(sig_changeShaderProgram(bool)), this , SLOT(changeShaderProgram(bool)));
+        connect(surf_form,SIGNAL(sig_changeShaderProgram(int)), this , SLOT(changeShaderProgram(int)));
         connect(surf_form,SIGNAL(sig_changeSurfaceMaterial(int)), this, SLOT(changeMaterial(int)));
         connect(surf_form,SIGNAL(sig_changedCurrentSurface(int)), this , SLOT(updateSurfaceProperties(int)));
         connect(surf_form,SIGNAL(sig_changedColourBar()), this , SLOT(updateColourBar()));
@@ -64,6 +64,7 @@ namespace briview{
         connect(surf_form, SIGNAL(sig_prevSurfaceScalars()),this,SLOT(prevScalarData()));
         connect(surf_form, SIGNAL(sig_nextSurfaceScalars()),this,SLOT(nextScalarData()));
 
+//        connect(surf_form, SIGNAL(sig_changedShader()),this,SLOT(changeShaderProgram(int)));
 
 
         connect(surf_form, SIGNAL(sig_displayGlyphs(bool)),this,SLOT(displayGlyphs(bool)));
@@ -740,15 +741,17 @@ cout<<"read surfs from scene "<<endl;
 
 */
 
-    void SurfaceContainer::changeShaderProgram( bool use_scalars )
+    void SurfaceContainer::changeShaderProgram( int program_index  )
     {
+        cout<<"chnage shader program "<<program_index<<endl;
          if (vbos_vertices.size()>0)
         {
              //cout<<"get curerent index << "<<surf_form->getCurrentSurfaceIndex()<<endl;
              vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
              for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
              {
-             surf_glsl_programs.at(*i_ind)=use_scalars;
+                 cout<<"program "<<surf_glsl_programs.size()<<" "<<(*i_ind)<<" "<<program_index<<" "<<glsl_programs[program_index]<<endl;
+             surf_glsl_programs.at(*i_ind)=program_index;//glsl_programs[program_index];
          }
              emit sig_updateGL();
     }
@@ -1110,16 +1113,23 @@ if (! indices->empty())
 
 
 
-    void SurfaceContainer::setGLSLPrograms(const std::vector<GLuint> & progs)
+    void SurfaceContainer::setGLSLPrograms(const std::vector< pair<QString,GLuint> > & progs)
     {
-        glsl_programs=progs;
+        glsl_programs.clear();
+        for ( vector< pair<QString,GLuint> >::const_iterator i = progs.begin(); i != progs.end(); ++i)
+            glsl_programs.push_back(i->second);
+
+        surf_form->setShaders(progs);
     }
 
-    void SurfaceContainer::setGLSLProgramsColourBar(const std::vector<GLuint> & progs)
+    void SurfaceContainer::setGLSLProgramsColourBar(const std::vector< pair<QString,GLuint> > & progs)
     {
        // if (c_bar != NULL)
           //  c_bar->setGLSLPrograms(c_bar_progs);
-            c_bar_progs=progs;
+//            c_bar_progs=progs;
+            c_bar_progs.clear();
+            for (  vector<  pair<QString,GLuint> >::const_iterator i = progs.begin(); i != progs.end(); ++i)
+                c_bar_progs.push_back(i->second);
     }
 
     float3 SurfaceContainer::getSurfaceCOG(const int & index)
@@ -1238,7 +1248,7 @@ delete[] m;
                     glPolygonMode(GL_FRONT, fill_type_f[surf_ind] );
                     glPolygonMode(GL_BACK , fill_type_b[surf_ind] );
                 }
-
+cout<<"use program "<<glsl_programs.at(surf_glsl_programs.at(surf_ind))<<endl;
                 glUseProgram(glsl_programs.at(surf_glsl_programs.at(surf_ind)));
 
                 glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, v_materials.at(surf_ind).ambient );

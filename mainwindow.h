@@ -7,6 +7,7 @@
 #include "graphcontainer.h"
 #include "scene_properties.h"
 #include "imagevideocapture.h"
+#include "glsl_editor.h"
 #include "my_structs.h"
 #include "fslsurface/fslsurface.h"
 #include <QMainWindow>
@@ -26,6 +27,7 @@ public:
     ~MainWindow();
 public slots:
 
+    void setProgram(int prog);
     void doAddImage();
     void doAddSurface();
     void doAppendSurfaceData();
@@ -62,6 +64,10 @@ void addColourBarToImage();
 
     void readGraphFromFile();
 
+    void setGLSLShaders();
+
+
+
 private:
     void setUpMenu();
 
@@ -72,7 +78,7 @@ private:
     briview::ImageContainer* imageContainer;
     briview::SurfaceContainer* surfaceContainer;
     briview::graphContainer* graphContainer_;
-
+    briview::glsl_editor* glsl_editor_;
     briview::scene_properties* scene;
     ImageVideoCapture* im_vid_widget;
 

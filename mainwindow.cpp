@@ -34,11 +34,12 @@ MainWindow::MainWindow(QWidget *parent)
 	QGLFormat fmt = ui->openGLwidget->format();
 	fmt.setSwapInterval(1);
 	ui->openGLwidget->setFormat(fmt);
-
 	//scene properties contain scene information such as camera,
 	//lighting, background colour, screen capture
 	scene = new scene_properties();
 
+    glsl_editor_ = new briview::glsl_editor();
+glsl_editor_->setVisible(1);
 	//Interactive video maker
 	im_vid_widget = new ImageVideoCapture();
 	im_vid_widget->setSceneWidget(scene);
@@ -82,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
     setUpMenu();
 
 
+    connect(glsl_editor_, SIGNAL(sig_setProgram(int)), this , SLOT(setProgram(int)));
 
 
 
@@ -92,9 +94,10 @@ MainWindow::MainWindow(QWidget *parent)
    cout<<"set graph conatiner"<<endl;
     ui->openGLwidget->setGraphContainer(&graphContainer_);
     cout<<"done set graph conatiner"<<endl;
-
+    ui->openGLwidget->setGLSLeditor(&glsl_editor_);
     ui->openGLwidget->setSceneProperties(&scene);
     cout<<"done main window constructor "<<endl;
+
 }
 MainWindow::~MainWindow()
 {
@@ -103,8 +106,15 @@ MainWindow::~MainWindow()
     delete scene;
     delete marchingCubes_widget;
     delete graphContainer_;
+    delete glsl_editor_;
     delete ui;
 }
+
+void MainWindow::setGLSLShaders()
+{
+    ui->openGLwidget->setGLSLShaders();
+}
+
 
 void MainWindow::setUpMenu()
 {
@@ -264,6 +274,7 @@ void MainWindow::setUpMenu()
     connect(actionSurface_Colour_Mapping,SIGNAL(triggered()),surfaceContainer,SLOT(showDockColourMap()));
     connect(actionPolygon_Rendering,SIGNAL(triggered()),surfaceContainer,SLOT(showDockPolygonMode()));
     connect(actionSlice_Surface, SIGNAL(triggered()),surfaceContainer,SLOT(sliceSurfaceY()));
+    connect(actionGLSL, SIGNAL(triggered()),surfaceContainer,SLOT(sliceSurfaceY()));
 
 
     menu_surface->addAction(actionSurface_Manipulator_Sidebar);
@@ -320,6 +331,14 @@ void MainWindow::copyGraphToSurfaces()
 
 
 }
+
+void MainWindow::setProgram(int index)
+{
+    cout<<"setprogram "<<index<<endl;
+    //openGLwidget will map index to program
+ui->openGLwidget->setProgram(index);
+}
+
 
 void MainWindow::showMarchingCubes()
 {

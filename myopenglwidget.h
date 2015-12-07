@@ -5,12 +5,15 @@
 #include <QtOpenGL>
 
 #include <iostream>
+#include <vector>
 #include "fslsurface/fslsurface_structs.h"
 #include <briview_structs.h>
 #include "graphcontainer.h"
 #include "surfacecontainer.h"
 #include "imagecontainer.h"
 #include "scene_properties.h"
+#include "glsl_editor.h"
+
 #include "tiffio.h"
 
 class gluDockWidget;
@@ -34,6 +37,8 @@ public:
     void setImageContainer(briview::ImageContainer** images_in) { images=*images_in;}
     void setSceneProperties(briview::scene_properties** scene);
     void setGLSLColorTable(const fslsurface_name::colour_table & ctab);
+    void setGLSLeditor( briview::glsl_editor ** glsl_in);
+ void setGLSLShaders();
     void setMouseSensitivity(int sens) { mouseSensitivity=sens/10.0; }
     void setMouseMode(int mode) { mouseMode=mode; }
 
@@ -51,6 +56,7 @@ public slots:
     void camera_down();
     void camera_left();
     void camera_right();
+    void setProgram( int index ); //sets the program on the GLSL editor
 
 signals:
     void changeCamera();
@@ -82,6 +88,8 @@ protected:
     briview::SurfaceContainer* surfaces;
     briview::ImageContainer* images;
     briview::scene_properties* scene_props;
+    briview::glsl_editor* glsl_editor_;
+
     void setShaders();
 
 
@@ -90,6 +98,7 @@ private:
 
     GLuint fbo,rbo[NumRenderbuffers];
 
+    std::vector< std::pair<QString,GLuint> > v_surf_glsl_programs;
 
     GLfloat r_lut[4],g_lut[4],b_lut[4],a_lut[4],sc_lut[4];
         GLfloat r_lut_last[2],g_lut_last[2],b_lut_last[2],a_lut_last[2], sc_lut_last[2];
@@ -103,6 +112,8 @@ private:
 
     GLuint v_im_texture,f_im_texture,p_im_texture;//vert,frag,p;
     GLuint v_im_texture_ctr,f_im_texture_ctr,p_im_texture_ctr;//vert,frag,p;
+    GLuint v_surf_enc_rgb,f_surf_enc_rgb,p_surf_enc_rgb;//vert,frag,p;
+
 
     bool mouseInMotion;
     int mouseInMotionCount;

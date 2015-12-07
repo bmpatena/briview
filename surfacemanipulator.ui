@@ -193,7 +193,7 @@
          <x>0</x>
          <y>0</y>
          <width>574</width>
-         <height>2299</height>
+         <height>2542</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -335,6 +335,52 @@
                <string>Append Surface Data..</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_32">
+              <item>
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Shader</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cbox_surf_shaders">
+                <property name="minimumContentsLength">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>shader1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>shader2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>shader3</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
             <item>
              <widget class="QGroupBox" name="groupBox_5">
@@ -699,7 +745,7 @@
           <property name="minimumSize">
            <size>
             <width>400</width>
-            <height>157</height>
+            <height>400</height>
            </size>
           </property>
           <property name="maximumSize">

@@ -40,14 +40,15 @@ public:
     void setScalarIndicesMinMax( const int & min, const int & max );
     int getCurrentScalarIndex();
     std::vector<int> getCurrentSurfaceIndices();
-
+void setShaders(const std::vector< std::pair<QString,GLuint> > & v_shaders);
     //   void updatePageText();
-
 
 public slots:
     void showDialog() { show(); }
 //   void nextPage();
   //      void prevPage();
+    void changeShader( int index );
+
     //-----------DOCKING-------------//
     void showDockSurfaceSelector();
     void showDockMaterialProperties();
@@ -99,6 +100,7 @@ public slots:
 
 signals:
 
+   // void sig_changedShader();
 
     void sig_changePolygonFillMode();
     void sig_changedCurrentSurface( int currentRow );
@@ -112,7 +114,7 @@ signals:
     void sig_changedColourTable(int);
     void sig_changedColourTableSc();
 
-    void sig_changeShaderProgram(bool map_scalars);
+    void sig_changeShaderProgram(int program_index);
     void sig_changeSurfaceMaterial(int index);
     void sig_changedPolygonModeFront(int index);
     void sig_changedPolygonModeBack(int index);
@@ -135,7 +137,7 @@ protected:
 
 private:
     float max_shininess;
-
+    std::vector<int> v_glsl_index;
     Ui::SurfaceManipulator_form *ui;
 };
 

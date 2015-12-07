@@ -3,9 +3,9 @@
 # -------------------------------------------------
 QT += opengl
 QT       += core gui widgets designer
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
 QMAKE_MAC_SDK=macosx
-QMAKE_MAC_SDK.macosx.path=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
+QMAKE_MAC_SDK.macosx.path=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk
 
 TARGET = briview
 
@@ -36,7 +36,8 @@ SOURCES += main.cpp \
     marchingcubes_form.cpp \
     imagevideocapture.cpp \
     graphmanipulator.cpp \
-    graphcontainer.cpp
+    graphcontainer.cpp \
+    glsl_editor.cpp
 FSLDIR = /usr/local/fsl
 INCLUDEPATH = ${FSLDIR}/include/ \
     ${HOME}/fslsrc/ \
@@ -55,7 +56,8 @@ macx {
   #  LIBS +=-L/usr/local/Trolltech/Qt-4.7.2/lib/
     LIBS += -framework GLUT
     LIBS +=-L./\
-    #-L../fslsurface/ \
+    -L/usr/local/lib \
+    -L./fslsurface/ \
     -L${HOME}/fslsrc/fslvtkio/ \
     -L${HOME}/fslsrc/expat/ \
     -L${HOME}/fslsrc/lib/ \
@@ -130,7 +132,8 @@ HEADERS += mainwindow.h \
     marchingcubes_form.h \
     imagevideocapture.h \
     graphmanipulator.h \
-    graphcontainer.h
+    graphcontainer.h \
+    glsl_editor.h
 FORMS += mainwindow.ui \
     imagemanipulator.ui \
     surfacemanipulator.ui \
@@ -138,7 +141,8 @@ FORMS += mainwindow.ui \
     scene_properties.ui \
     marchingcubes_form.ui \
     imagevideocapture.ui \
-    graphmanipulator.ui
+    graphmanipulator.ui \
+    glsl_editor.ui
 OTHER_FILES += glsl_shaders/image_plane_texture.vert \
     glsl_shaders/image_plane_texture.frag \
     glsl_shaders/surface_dir_light.frag \
@@ -148,7 +152,9 @@ OTHER_FILES += glsl_shaders/image_plane_texture.vert \
     glsl_shaders/image_plane_texture_cmap.frag \
     glsl_shaders/image_plane_texture_cmap.vert \
     glsl_shaders/colour_bar_map_scalars.vert \
-    glsl_shaders/colour_bar_map_scalars.frag
+    glsl_shaders/colour_bar_map_scalars.frag \
+    glsl_shaders/surf_encode_rgb.vert \
+    glsl_shaders/surf_encode_rgb.frag
 GLSL_PROGRAMS.files = glsl_shaders/surface_dir_light.frag \
     glsl_shaders/surface_dir_light.vert
 GLSL_PROGRAMS.files += glsl_shaders/surface_dir_light_map_scalars.frag \

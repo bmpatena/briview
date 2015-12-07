@@ -72,8 +72,8 @@ namespace briview{
       //  void setColourBarUniformLocations(const GLint & loc_r_lut,const GLint & loc_g_lut,const GLint & loc_b_lut, const GLint & loc_sc_lut);
     void setColourTableUniformLocations(const GLint & loc_r_lut_in,const GLint & loc_g_lut_in,const GLint & loc_b_lut_in, const GLint & loc_a_lut_in,const GLint & loc_sc_lut_in,const GLint & loc_r_lut_last_in,const GLint & loc_g_lut_last_in,const GLint & loc_b_lut_last_in,const GLint & loc_a_lut_last_in, const GLint & loc_sc_lut_last_in, const GLint & loc_low_clamp_in);
 
-        void setGLSLPrograms(const std::vector<GLuint> & progs);
-        void setGLSLProgramsColourBar(const std::vector<GLuint> & progs);
+        void setGLSLPrograms(const std::vector< std::pair<QString, GLuint> > & progs);
+        void setGLSLProgramsColourBar(const std::vector< std::pair<QString, GLuint> > & progs);
 
     public slots:
 
@@ -102,7 +102,7 @@ namespace briview{
             void updatePolygonModeFront( int gl_enum );
             void updatePolygonModeBackGlyph( int gl_enum );
             void updatePolygonModeFrontGlyph( int gl_enum );
-        void changeShaderProgram( bool use_scalars );
+        void changeShaderProgram( int program_index );
         void toggleCullFace( bool cull );
         void setFrontFaceCCW( bool CCW );
 

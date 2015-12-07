@@ -662,9 +662,11 @@ void graphContainer::render()
 }
 }
 
-void graphContainer::setGLSLPrograms(const std::vector<GLuint> & progs)
+void graphContainer::setGLSLPrograms(const std::vector< std::pair<QString, GLuint> >  & progs)
 {
-    glsl_programs=progs;
+    glsl_programs.clear();
+    for ( vector< pair<QString,GLuint> >::const_iterator i = progs.begin(); i != progs.end(); ++i)
+        glsl_programs.push_back(i->second);
 }
 
 

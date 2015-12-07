@@ -29,7 +29,7 @@ public:
 
     void render();
     bool doRender() { return graph_form->doRender();  }
-    void setGLSLPrograms(const std::vector<GLuint> & progs);
+    void setGLSLPrograms(const std::vector< std::pair<QString, GLuint> >  & progs);
 
     fslsurface_name::fslSurface<float,unsigned int> getGraphNodesAsSurface() { return surf_graph_nodes_;}
     fslsurface_name::fslSurface<float,unsigned int> getGraphLinksAsSurface() { return surf_graph_links_;}

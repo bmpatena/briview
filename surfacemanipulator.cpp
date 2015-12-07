@@ -63,6 +63,8 @@ SurfaceManipulator::SurfaceManipulator(QWidget *parent) :
     connect(ui->opacity_slider, SIGNAL(sliderMoved(int)),this,SLOT(setOpacity(int)));
 
     connect(ui->surface_list, SIGNAL(currentRowChanged (int) ),this,SIGNAL(sig_changedCurrentSurface(int)));
+    connect(ui->cbox_surf_shaders , SIGNAL(currentIndexChanged (int) ),this,SLOT(changeShader(int)));
+
     connect(ui->surf_app_data, SIGNAL(currentRowChanged (int)),this,SIGNAL(sig_updateAppendedSurfaceInfo(int)));
     connect(ui->PlayScalars,SIGNAL(released()),this, SIGNAL(sig_playSurfaceScalars()));
     connect(ui->scalar_prev ,SIGNAL(pressed()),this, SIGNAL(sig_prevSurfaceScalars()));
@@ -110,8 +112,8 @@ SurfaceManipulator::SurfaceManipulator(QWidget *parent) :
     connect(ui->ctab_b_lclamp, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourTable()));
     connect(ui->ctab_a_lclamp, SIGNAL(textEdited(QString)),this,SIGNAL(sig_changedColourTable()));
 
-    connect(ui->radio_useScalars, SIGNAL(clicked(bool)),this,SIGNAL(sig_changeShaderProgram(bool)));
-
+//    connect(ui->radio_useScalars, SIGNAL(clicked(bool)),this,SIGNAL(sig_changeShaderProgram(bool)));
+//connect(ui->cbox_surf_shaders, SIGNAL(currentIndexChanged(int)),this,SIGNAL(sig_changeShaderProgram(int)));
     connect(ui->combo_preset_materials, SIGNAL(currentIndexChanged(int)),this,SIGNAL(sig_changeSurfaceMaterial(int)));
 
     //--------------------------Colour Bar------------------------------------
@@ -177,6 +179,28 @@ SurfaceManipulator::SurfaceManipulator(QWidget *parent) :
     ui->radio_useScalars->setChecked(true);
 
 }
+
+void SurfaceManipulator::setShaders(const std::vector< pair<QString,GLuint> > & v_shaders)
+{
+cout<<"ste shaders "<<v_shaders.size()<<endl;
+// ui->cbox_shaders->clear();
+int index=0;
+    for ( vector< pair<QString,GLuint> >::const_iterator i = v_shaders.begin(); i != v_shaders.end(); ++i, ++index )
+    {
+        cout<<"set.. "<<i->first.toStdString()<<" "<<ui->cbox_surf_shaders->count()<<endl;
+     ui->cbox_surf_shaders->setItemText(index, i->first);
+     //cout<<"set.. "<<i->first.toStdString()<<" "<<ui->cbox_surf_shaders->count()<<endl;
+      //  ui->cbox_surf_shaders->addItem("BLH");//i->first);
+        //ui->cbox_surf_shaders->setDisabled(false);
+
+       // ui->cbox_shaders->insertItem(0,QString("BLH"),QString("BLH"));//i->first);
+
+    }
+    cout<<"doneste shaders"<<endl;
+
+}
+
+
 void SurfaceManipulator::setCullFace(const bool & cull )
 {
     // cout<<"setcull "<<cull<<endl;
@@ -703,6 +727,15 @@ SurfaceManipulator::~SurfaceManipulator()
 {
     delete ui;
 }
+void SurfaceManipulator::changeShader( int index )
+{
+    if (ui->surface_list->currentRow() >= 0 )
+    {
+    v_glsl_index[ ui->surface_list->currentRow() ] = ui->cbox_surf_shaders->currentIndex();
+    cout<<"change shader " <<v_glsl_index[ ui->surface_list->currentRow() ] <<endl;
+    emit sig_changeShaderProgram(ui->cbox_surf_shaders->currentIndex());
+}
+    }
 
 void SurfaceManipulator::addItemToList(const string & filename)
 {
@@ -712,7 +745,7 @@ void SurfaceManipulator::addItemToList(const string & filename)
 
     ui->surface_list->setCurrentRow(ui->surface_list->count()-1,QItemSelectionModel::Deselect);
     ui->surface_list->setCurrentRow(ui->surface_list->count()-1);
-
+v_glsl_index.push_back(0);
         //cout<<"add tien3"<<endl;
 
 }

@@ -15,6 +15,7 @@ myOpenGLWidget::myOpenGLWidget(QWidget *parent) : QGLWidget(parent) {
     mouseInMotion=false;
     mouseInMotionCount=0;
 
+
 }
 
 myOpenGLWidget::~myOpenGLWidget() {
@@ -36,6 +37,15 @@ myOpenGLWidget::~myOpenGLWidget() {
     glDeleteFramebuffers(1,&fbo);
     glDeleteRenderbuffers(2, rbo);
 #endif
+
+}
+
+void myOpenGLWidget::setProgram( int index )
+{
+    //sets the program on the GLSL editor
+    cout<<"v_surf_glsl_programs "<<v_surf_glsl_programs.size()<<endl;
+    if (! v_surf_glsl_programs.empty())
+     glsl_editor_->setProgram(v_surf_glsl_programs[index].second);
 
 }
 
@@ -670,7 +680,9 @@ void  myOpenGLWidget::setShaders() {
     //cout<<"set shaders "<<(QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light_map_scalars.vert").toStdString()<<endl;
     vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light_map_scalars_ctrthresh.vert").toUtf8().data());
     ///vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light_map_scalars.vert").toAscii());
+//    glsl_editor_->ui->cbox_glsl.addItem(QString("surface_dir_light_map_scalars"));
 
+    glsl_editor_->addShader(QString("surface_dir_light_map_scalars"));
     fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light_map_scalars.frag").toUtf8().data());
 
     const char * vv_light_dir = vs;
@@ -683,7 +695,7 @@ void  myOpenGLWidget::setShaders() {
     glCompileShader(f_light_dir_map_scalars);
 
     p_light_dir_map_scalars = glCreateProgram();
-
+    v_surf_glsl_programs.push_back( pair<QString,GLuint>("p_light_dir_map_scalars",p_light_dir_map_scalars));
     glAttachShader(p_light_dir_map_scalars,v_light_dir_map_scalars);
     glAttachShader(p_light_dir_map_scalars,f_light_dir_map_scalars);
 
@@ -778,6 +790,7 @@ void  myOpenGLWidget::setShaders() {
 
     vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light.vert").toUtf8().data());
     fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surface_dir_light.frag").toUtf8().data());
+    glsl_editor_->addShader(QString("surface_dir_light"));
 
     vv_light_dir = vs;
     ff_light_dir = fs;
@@ -789,6 +802,7 @@ void  myOpenGLWidget::setShaders() {
     glCompileShader(f_light_dir);
 
     p_light_dir = glCreateProgram();
+    v_surf_glsl_programs.push_back(pair<QString,GLuint>("p_light_dir",p_light_dir));
 
     glAttachShader(p_light_dir,v_light_dir);
     glAttachShader(p_light_dir,f_light_dir);
@@ -804,6 +818,7 @@ void  myOpenGLWidget::setShaders() {
 
     vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture.vert").toUtf8().data());
     fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture.frag").toUtf8().data());
+    glsl_editor_->addShader(QString("image_plane_texture"));
 
     // vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_with_vertex.vert").toAscii());
     //fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_with_vertex.frag").toAscii());
@@ -818,6 +833,7 @@ void  myOpenGLWidget::setShaders() {
     glCompileShader(f_im_texture);
 
     p_im_texture = glCreateProgram();
+    //v_surf_glsl_programs.push_back(p_im_texture);
 
     glAttachShader(p_im_texture,v_im_texture);
     glAttachShader(p_im_texture,f_im_texture);
@@ -829,6 +845,7 @@ void  myOpenGLWidget::setShaders() {
 
     vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture.vert").toUtf8().data());
     fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/image_plane_texture_ctrthresh.frag").toUtf8().data());
+    glsl_editor_->addShader(QString("image_plane_texture_ctrthresh"));
 
     v_im_texture_ctr = glCreateShader(GL_VERTEX_SHADER);
     f_im_texture_ctr = glCreateShader(GL_FRAGMENT_SHADER);
@@ -840,12 +857,37 @@ void  myOpenGLWidget::setShaders() {
     glCompileShader(f_im_texture_ctr);
 
     p_im_texture_ctr = glCreateProgram();
+    //v_glsl_programs.push_back(p_im_texture_ctr);
 
     glAttachShader(p_im_texture_ctr,v_im_texture_ctr);
     glAttachShader(p_im_texture_ctr,f_im_texture_ctr);
 
     glLinkProgram(p_im_texture_ctr);
     glUseProgram(p_im_texture_ctr);
+
+    //**********************Surface 3D atlas - encoded RGB values********************//
+
+    vs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surf_encode_rgb.vert").toUtf8().data());
+    fs = textFileRead((QApplication::applicationDirPath() + "/glsl_shaders/surf_encode_rgb.frag").toUtf8().data());
+    glsl_editor_->addShader(QString("surf_encode_rgb"));
+
+    v_surf_enc_rgb = glCreateShader(GL_VERTEX_SHADER);
+    f_surf_enc_rgb = glCreateShader(GL_FRAGMENT_SHADER);
+    const char * vv_surf_enc_rgb = vs;
+    const char * ff_surf_enc_rgb = fs;
+    glShaderSource(v_surf_enc_rgb, 1, &vv_surf_enc_rgb,NULL);
+    glShaderSource(f_surf_enc_rgb, 1, &ff_surf_enc_rgb,NULL);
+    glCompileShader(v_surf_enc_rgb);
+    glCompileShader(f_surf_enc_rgb);
+
+    p_surf_enc_rgb = glCreateProgram();
+    v_surf_glsl_programs.push_back(pair<QString,GLuint>("p_surf_enc_rgb",p_surf_enc_rgb));
+
+    glAttachShader(p_surf_enc_rgb,v_surf_enc_rgb);
+    glAttachShader(p_surf_enc_rgb,f_surf_enc_rgb);
+
+    glLinkProgram(p_surf_enc_rgb);
+    glUseProgram(p_surf_enc_rgb);
 
 
 
@@ -1359,6 +1401,13 @@ void myOpenGLWidget::setSceneProperties(scene_properties** scene)
     scene_props=*scene;
 }
 
+void myOpenGLWidget::setGLSLeditor( briview::glsl_editor ** glsl_in)
+{
+    glsl_editor_ = *glsl_in;
+
+}
+
+
 void myOpenGLWidget::setSurfaceContainer(SurfaceContainer** surf_in)
 {
     surfaces=*surf_in;
@@ -1404,6 +1453,7 @@ void myOpenGLWidget::setGLSLColorTable(const colour_table & ctab)
 
 void myOpenGLWidget::initializeGL()
 {
+    cout<<"initialize GL "<<endl;
     if (QGLFormat::OpenGL_Version_3_0)
         cout<<"openGL 3.0 is supported"<<endl;
     else if (QGLFormat::OpenGL_Version_2_1)
@@ -1583,18 +1633,20 @@ void myOpenGLWidget::initializeGL()
     glFrontFace(GL_CCW);
 
     setShaders();
+cout<<"Encode RGB "<<p_surf_enc_rgb<<endl;
+//    vector<GLuint> progs;
+//    progs.(p_light_dir);
+    //progs.(p_surf_enc_rgb);
+//    progs.(p_light_dir_map_scalars);
+    //  progs.(p_cbar_map_scalars);
+surfaces->setGLSLPrograms(v_surf_glsl_programs);
 
-    vector<GLuint> progs;
-    progs.push_back(p_light_dir);
-    progs.push_back(p_light_dir_map_scalars);
-    //  progs.push_back(p_cbar_map_scalars);
-
-    surfaces->setGLSLPrograms(progs);
+//    surfaces->setGLSLPrograms(progs);
     //surfaces->setGLSLProgramsColourBar(progs);
     //    vector<GLuint> progs_graph;
     //    progs_graph.push_back(p_light_dir_map_scalars);//nodes
     //    progs_graph.push_back(p_light_dir_map_scalars);//links
-    graph_->setGLSLPrograms(progs);
+    graph_->setGLSLPrograms(v_surf_glsl_programs);
     images->setGLSLProgram(p_im_texture);
     images->setGLSLProgramCbar(p_light_dir_map_scalars);
 
@@ -1609,7 +1661,11 @@ void myOpenGLWidget::initializeGL()
 
 #endif
 }
-
+void myOpenGLWidget::setGLSLShaders()
+{
+    cout<<"set glsls shaders "<<v_surf_glsl_programs.size()<<endl;
+    surfaces->setGLSLPrograms(v_surf_glsl_programs);
+}
 void myOpenGLWidget::resizeGL(int w, int h)
 {
     // setup viewport, projection etc.:
@@ -1693,7 +1749,8 @@ void myOpenGLWidget::paintGL()
 	surfaces->renderOpaqueSurfaces();
 
 	surfaces->renderOpaqueGlyphs();
-	glUseProgram(p_light_dir_map_scalars);
+//	glUseProgram(p_light_dir_map_scalars);
+    glUseProgram(p_surf_enc_rgb);
 
 	surfaces->renderColourBar();
 	//cout<<"done rende cbar"<<endl;

@@ -11,8 +11,9 @@ int main(int argc, char *argv[])
 
     a.desktop()->screenGeometry();
     MainWindow w;
-    w.setMaximumSize ( a.desktop()->screenGeometry().size() );
+//    w.setMaximumSize ( a.desktop()->screenGeometry().size() );
     w.showMaximized();
+//    w.setGLSLShaders();
 
     int i=1;
     bool loadIm=false,loadMesh=false, loadGraph;
