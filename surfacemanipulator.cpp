@@ -498,6 +498,12 @@ void SurfaceManipulator::setShaderIndex(const int & index)
     ui->radio_useScalars->setChecked(index);
 
 }
+void SurfaceManipulator::setShaderIndex(const int & surf_index, const int & glsl_index)
+{
+    v_glsl_index[surf_index] = glsl_index;
+    ui->cbox_surf_shaders->setCurrentIndex(glsl_index);
+}
+
 /*
  void SurfaceManipulator::updatePageText()
     {

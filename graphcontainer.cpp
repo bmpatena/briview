@@ -533,7 +533,7 @@ void graphContainer::changeScalarData()
 
     void graphContainer::updateColourTableNode(  )
 {//this update colour table now updates the GLSL colour table not the form
-    cout<<"update coour node table "<<endl;
+//    cout<<"update coour node table "<<endl;
 
     //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
      //   for (vector<int>::iterator i_ind = cur_indices.begin(); i_ind != cur_indices.end(); ++i_ind )
@@ -544,7 +544,7 @@ void graphContainer::changeScalarData()
 
         emit sig_updateGL();
 
-   cout<<"done update colour table"<<endl;
+//   cout<<"done update colour table"<<endl;
 }
 void graphContainer::changeColourTableNode(int index)
 {
@@ -610,7 +610,7 @@ void graphContainer::setColourTableEdge(  )
 
 void graphContainer::updateColourTableEdges(  )
 {//this update colour table now updates the GLSL colour table not the form
-    cout<<"update coour links table "<<endl;
+//    cout<<"update coour links table "<<endl;
     edges_ctable = graph_form->getLinksColourTable();
 
     //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
@@ -620,7 +620,7 @@ void graphContainer::updateColourTableEdges(  )
 
         emit sig_updateGL();
 
-   cout<<"done update colour table"<<endl;
+//   cout<<"done update colour table"<<endl;
 }
 
 void graphContainer::render()

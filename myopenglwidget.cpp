@@ -3,6 +3,7 @@
 #include<QDir>
 #include "misc.h"
 #include <cmath>
+
 #define PI 3.14159265
 
 using namespace std;
@@ -53,7 +54,8 @@ void myOpenGLWidget::setProgram( int index )
 int writeTIFF(const unsigned int &  width, const unsigned int & height, const string & filename  , const unsigned int & compression)
 {
     TIFF *file;
-    GLfloat *image, *p;
+    GLfloat *image;//, *p;
+    char *image_uint,*p;
     int i;
 
     file = TIFFOpen(filename.c_str(), "w");
@@ -61,6 +63,7 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
         return 1;
     }
     image = (GLfloat *) malloc(width * height * sizeof(GLfloat) * 3);
+    image_uint = (char *) malloc(width * height * sizeof(char) * 3);
 
     /* OpenGL's default 4 byte pack alignment would leave extra bytes at the
        end of each image row so that each full row contained a number of bytes
@@ -73,14 +76,25 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
 
     glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, image);
 
-    //   for (int i = 0 ; i < 10; ++i)
-    //        cout<<"image "<<sizeof(GL_FLOAT)<<" "<<image[i]<<endl;
+    GLfloat* im_fptr = image;
+    char* im_uptr = image_uint;
+    for (int i = 0 ; i < width * height*3; ++i,++im_fptr, ++im_uptr)
+    {
+        *im_uptr = static_cast<unsigned char>(((*im_fptr)*255));
+//        cout<<"im_uptr "<<((*im_fptr)*255)<<" "<<(*im_fptr)<<" "<<static_cast<unsigned char>(((*im_fptr)*255))<<endl;
+    }
+
+
+//       for (int i = 0 ; i < 10 ; ++i)//width * height*3; ++i)
+//            cout<<"image "<<sizeof(uint32)<<" "<<image[i]<<" "<<image_uint[i]<<endl;
 
 
     TIFFSetField(file, TIFFTAG_IMAGEWIDTH, (uint32) width);
     TIFFSetField(file, TIFFTAG_IMAGELENGTH, (uint32) height);
-    TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, sizeof(GL_FLOAT)*8);
-    TIFFSetField(file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+//    TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, sizeof(GL_FLOAT)*8);
+    TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
+ TIFFSetField(file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+//    TIFFSetField(file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
     //TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
     TIFFSetField(file, TIFFTAG_COMPRESSION, compression);
     TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
@@ -88,10 +102,13 @@ int writeTIFF(const unsigned int &  width, const unsigned int & height, const st
     TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
     TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, "OpenGL-rendered using brview");
-    p = image;
+    p = image_uint;
+    //p = image;
+
     for (i = height - 1; i >= 0; i--) {
         if (TIFFWriteScanline(file, p, i, 0) < 0) {
             free(image);
+            free(image_uint);
             TIFFClose(file);
             return 1;
         }

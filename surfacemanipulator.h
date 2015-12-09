@@ -43,6 +43,8 @@ public:
 void setShaders(const std::vector< std::pair<QString,GLuint> > & v_shaders);
     //   void updatePageText();
 
+void setShaderIndex(const int & surf_index, const int & glsl_index);
+
 public slots:
     void showDialog() { show(); }
 //   void nextPage();

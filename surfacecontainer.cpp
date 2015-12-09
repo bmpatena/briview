@@ -149,7 +149,14 @@ cout<<"read surfs from scene "<<endl;
 
     		          surf_form->setColourTableIndex(0);
 
-    		}
+            }else if (keyword == "GLSLprogram" )
+            {
+                unsigned int prog_index;
+                ss>>prog_index;
+                surf_glsl_programs.back()= prog_index;
+                surf_form->setShaderIndex(surf_glsl_programs.size()-1, prog_index);
+            }
+
     	}
     }
 
@@ -535,7 +542,7 @@ cout<<"read surfs from scene "<<endl;
 
         void SurfaceContainer::updateColourTable( const int & index )
         {//this update colour table now updates the GLSL colour table not the form
-            cout<<"update coour table "<<index<<endl;
+//            cout<<"update coour table "<<index<<endl;
             if (vbos_vertices.size()>0)
             {
             //    vector<int> cur_indices = surf_form->getCurrentSurfaceIndices();
@@ -545,7 +552,7 @@ cout<<"read surfs from scene "<<endl;
                 glUseProgram(glsl_programs.at(surf_glsl_programs.at(index)));
                 int loc_test = glGetUniformLocation(glsl_programs.at(surf_glsl_programs.at(index)),"r_lut");
 
-                cout<<"sc "<<v_surf_ctables.at(index).sc_lut[0]<<" "<<v_surf_ctables.at(index).sc_lut[1]<<" "<<v_surf_ctables.at(index).sc_lut[2]<<" "<<v_surf_ctables.at(index).sc_lut[3]<<" "<<endl;
+               // cout<<"sc "<<v_surf_ctables.at(index).sc_lut[0]<<" "<<v_surf_ctables.at(index).sc_lut[1]<<" "<<v_surf_ctables.at(index).sc_lut[2]<<" "<<v_surf_ctables.at(index).sc_lut[3]<<" "<<endl;
 //        /cout<<"temp1 "<<index<<" "<<v_surf_ctables.size()<<endl;
                // v_ctables.at(*i_ind)=surf_form->getCurrentColourTable();
                 glUniform4fv(loc_r_lut,1,v_surf_ctables.at(index).r_lut);
@@ -592,7 +599,7 @@ cout<<"read surfs from scene "<<endl;
                 }
                // emit sig_updateGL();
             }
-           cout<<"done update colour table"<<endl;
+//           cout<<"done update colour table"<<endl;
         }
 
     void SurfaceContainer::updateColourBar()
@@ -1248,7 +1255,7 @@ delete[] m;
                     glPolygonMode(GL_FRONT, fill_type_f[surf_ind] );
                     glPolygonMode(GL_BACK , fill_type_b[surf_ind] );
                 }
-cout<<"use program "<<glsl_programs.at(surf_glsl_programs.at(surf_ind))<<endl;
+//cout<<"use program "<<glsl_programs.at(surf_glsl_programs.at(surf_ind))<<endl;
                 glUseProgram(glsl_programs.at(surf_glsl_programs.at(surf_ind)));
 
                 glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, v_materials.at(surf_ind).ambient );
@@ -1256,7 +1263,7 @@ cout<<"use program "<<glsl_programs.at(surf_glsl_programs.at(surf_ind))<<endl;
                 glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,v_materials.at(surf_ind).shininess);
                 glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR, v_materials.at(surf_ind).specular);
                 ////cout<<"render "<<v_surfaces.size()<<" "<<surf_ind<<" "<<vertexLoc<<" "<<normalLoc<<" "<<scalarLoc<<endl;
-                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
+//                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
 
                 render<float,unsigned int>(*v_surfaces[surf_ind], vertexLoc,normalLoc,scalarLoc,vbos_vertices.at(surf_ind)[0] ,vbos_vertices.at(surf_ind)[1] );
 
@@ -1319,7 +1326,7 @@ glBlendEquation(GL_FUNC_ADD);
                 glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR, v_materials.at(surf_ind).specular);
 
                 cout<<"sort triangles "<<surf_ind<<endl;
-                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
+//                sortTriangles(v_surfaces[surf_ind],surf_ind, _eye, _centre);
                render<float,unsigned int>( *v_surfaces[surf_ind], vertexLoc,normalLoc,scalarLoc,vbos_vertices.at(surf_ind)[0] ,vbos_vertices.at(surf_ind)[1] );
 
             }

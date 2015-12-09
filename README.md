@@ -14,6 +14,7 @@ Some key features include:
 
 * [libtiff](http://www.remotesensing.org/libtiff/v4.0.6.html)
 * [mp4v2](https://code.google.com/p/mp4v2/)
+* [ImageMagik](http://www.imagemagick.org)
 
 #Manual 
 ====
