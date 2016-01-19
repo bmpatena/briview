@@ -13,9 +13,18 @@
         void main()
         {
             int index;
-		  float b = floor(InScalar / (256. * 256.)  );
-			float g = floor( ( InScalar - b * 256. * 256. ) / 256. );
-			float r = ( ( InScalar - b * 256. * 256. - g * 256. ) );
+	    float r,g,b;
+	    	if ( InScalar > 0. )
+		{
+		  b = floor(InScalar / (256. * 256.)  );
+			g = floor( ( InScalar - b * 256. * 256. ) / 256. );
+			r = ( ( InScalar - b * 256. * 256. - g * 256. ) );
+		}else{
+		b=187.;
+		g=187.;
+		r=187.;
+}		
+	
 		mat_color = vec4(r/256.,g/256.,b/256.,1.0);	
 
 		//mat_color = vec4(0.0,1.0,1.0,1.0);          	
