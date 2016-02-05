@@ -42,8 +42,9 @@ namespace briview{
         string stemp;
         ss>>stemp;
 //glUseProgram(0);
+        glColor4f(0.0,0.0,0.0,1.0);
 
-           glColor4f(1.0,1.0,1.0,1.0);
+//           glColor4f(1.0,1.0,1.0,1.0);
         char *ci = const_cast<char*>(stemp.c_str());
          char *c;
          unsigned char* clen = (unsigned char*)(stemp.c_str());
