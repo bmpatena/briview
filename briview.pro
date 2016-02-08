@@ -96,6 +96,7 @@ LIBS =-L./ \
     -L${HOME}/fslsrc/nifti/lib \
     -L${FSLDIR}/extras/lib/ \
     -L${GLUT_HOME}/lib/glut  \
+    -lfslsurfacegl \
     -lfslsurface \
     -lgiftiio \
     -lnewimage \
@@ -108,7 +109,7 @@ LIBS =-L./ \
     -lznz \
     -lnewmat \
     -lutils \
-    -lz -lexpat
+    -lz -lexpat -ltiff -lGLU
     LIBS += -L${GLUT_HOME}/lib/glut -lglut
 }
 

@@ -3,7 +3,11 @@
 #include <iostream>
 #include "scene_properties.h"
 #include "ui_scene_properties.h"
+#ifdef __unix__
+#include <GL/glu.h>
+#else
 #include <OpenGL/glu.h>
+#endif
 
 using namespace std;
 

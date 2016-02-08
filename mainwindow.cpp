@@ -119,7 +119,7 @@ void MainWindow::setGLSLShaders()
 void MainWindow::setUpMenu()
 {
     ui->menuBar->clear();
-
+ ui->menuBar->setEnabled(true);
     QMenu* menu_file =  ui->menuBar->addMenu(tr("&File"));
     QAction* actionLoad_Image = new QAction(tr("&Load Image..."),0);
     QAction* actionLoad_Surface = new QAction(tr("&Load Surface..."),0);
@@ -253,7 +253,7 @@ void MainWindow::setUpMenu()
     ///
 
     QMenu* menu_surface =  ui->menuBar->addMenu(tr("&Surface Tools"));
-
+menu_surface->setEnabled(true);
     QAction* actionSurface_Manipulator_Sidebar = new QAction(tr("&Surface Manipulator Sidebar..."),0);
     actionSurface_Manipulator_Sidebar->setCheckable(true);
     QAction* actionSurface_Scalar_Selector = new QAction(tr("&Surface/Scalar Selector..."),0);
